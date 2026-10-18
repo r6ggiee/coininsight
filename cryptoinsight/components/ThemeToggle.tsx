@@ -1,33 +1,47 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { applyTheme, getStoredTheme, nextTheme, watchSystemTheme, type ThemeChoice } from "@/lib/theme";
+import { useAuth } from "./AuthProvider";
 
+const LABEL: Record<ThemeChoice, string> = {
+  light: "Light",
+  dark: "Dark",
+  system: "System",
+};
+
+/** Theme switcher: cycles Light -> Dark -> System. Persists locally and, when
+ *  signed in, to the account's settings so it follows the user. */
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<string>("light");
+  const [theme, setTheme] = useState<ThemeChoice>("system");
+  const { supabase, user } = useAuth();
 
   useEffect(() => {
-    const t = document.documentElement.getAttribute("data-theme") || "light";
-    setTheme(t);
+    setTheme(getStoredTheme());
+    return watchSystemTheme();
   }, []);
 
-  const toggle = () => {
-    const next = theme === "dark" ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", next);
-    try {
-      localStorage.setItem("ci-theme", next);
-    } catch {
-      // private mode: theme just won't persist
-    }
+  const cycle = () => {
+    const next = nextTheme(theme);
+    applyTheme(next);
     setTheme(next);
+    // Mirror into the account when signed in. Fire and forget.
+    if (supabase && user) {
+      supabase
+        .from("user_settings")
+        .upsert({ user_id: user.id, theme: next, updated_at: new Date().toISOString() })
+        .then(() => {});
+    }
   };
 
   return (
     <button
       className="theme-toggle"
-      onClick={toggle}
-      aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+      onClick={cycle}
+      aria-label={`Theme: ${LABEL[theme]}. Activate to switch theme.`}
+      title={`Theme: ${LABEL[theme]}`}
     >
-      {theme === "dark" ? "Light mode" : "Dark mode"}
+      {LABEL[theme]} mode
     </button>
   );
 }

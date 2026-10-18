@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { isWatched, toggleWatch, type WatchEntry } from "@/lib/watchlist";
+import { pushToggleToCloud } from "@/lib/watchlist-cloud";
+import { useAuth } from "./AuthProvider";
 
 /** Star toggle for the watchlist. Works anywhere: picker chips, brief
- *  headers, watchlist cards. localStorage only. */
+ *  headers, watchlist cards. localStorage mirror always; DB sync when signed in. */
 export default function WatchlistButton({
   entry,
   size = "md",
@@ -14,6 +16,7 @@ export default function WatchlistButton({
 }) {
   const [watched, setWatched] = useState(false);
   const [ready, setReady] = useState(false);
+  const { supabase, user } = useAuth();
 
   useEffect(() => {
     setWatched(isWatched(entry));
@@ -24,7 +27,13 @@ export default function WatchlistButton({
   const onClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setWatched(toggleWatch(entry));
+    const nowWatched = toggleWatch(entry);
+    setWatched(nowWatched);
+    // Mirror into the account when signed in. Fire and forget: the local
+    // toggle already updated, so a cloud failure never breaks the UI.
+    if (supabase && user) {
+      pushToggleToCloud(supabase, entry, nowWatched).catch(() => {});
+    }
   };
 
   if (!ready) {

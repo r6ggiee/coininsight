@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import ThemeToggle from "./ThemeToggle";
+import UserMenu from "./UserMenu";
 
 const LINKS = [
   { href: "/", label: "Home" },
@@ -63,6 +64,7 @@ export default function Header() {
           <span aria-hidden="true">{menuOpen ? "✕" : "☰"}</span>
         </button>
         <ThemeToggle />
+        <UserMenu />
       </div>
       {menuOpen && (
         <nav id="mobile-menu" className="nav-dropdown" aria-label="Mobile">

@@ -107,7 +107,7 @@ export async function fetchCoinGeckoCandles(coingeckoId: string): Promise<Candle
     `https://api.coingecko.com/api/v3/coins/${coingeckoId}/market_chart?vs_currency=usd&days=7`
   );
   const prices = j?.prices;
-  if (!Array.isArray(prices) || prices.length < 50) return null;
+  if (!Array.isArray(prices) || prices.length < 15) return null;
   return (prices as any[]).map(([t, p]: [number, number]) =>
     toCandle(t, p, p, p, p, 0)
   );

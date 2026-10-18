@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
+import AuthProvider from "@/components/AuthProvider";
 
 export const metadata: Metadata = {
   // Set NEXT_PUBLIC_SITE_URL to the production domain (e.g. https://cryptoinsight.xyz)
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
   },
 };
 
-const themeInitScript = `(function(){try{var t=localStorage.getItem('ci-theme');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();`;
+const themeInitScript = `(function(){try{var t=localStorage.getItem('ci-theme');if(t!=='light'&&t!=='dark'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -26,8 +27,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body>
-        <Header />
-        <main className="page">{children}</main>
+        <AuthProvider>
+          <Header />
+          <main className="page">{children}</main>
+        </AuthProvider>
         <footer className="site-footer">
           <div className="footer-inner">
             <div className="footer-brand">

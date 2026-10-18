@@ -164,7 +164,10 @@ export function assembleBrief(input: BriefInput): Brief {
     `${posSentence} ` +
     `Its momentum gauge (RSI, a 0 to 100 score of how strong recent buying has been) reads ${rsi14 === null ? "n/a" : rsi14.toFixed(0)}, which is ${rsiWord(rsi14)}. ` +
     `Hour to hour swings are running ${volWord}, at about ${vol === null ? "n/a" : vol.toFixed(2)}% of price per hour on average. ` +
-    `${fundingSentence}`;
+    `${fundingSentence}` +
+    (candles.length < 50
+      ? ` This coin has a thin price history on record (about ${candles.length} hourly points), so treat the read with extra caution.`
+      : "");
 
   const stats: BriefStats = {
     price, change24h: chg24, rsi: rsi14, sma20, sma50,
