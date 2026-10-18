@@ -53,7 +53,7 @@ function parseRss(xml: string, outlet: string): Headline[] {
   });
 }
 
-export async function fetchHeadlines(keywords: string[], limit = 5): Promise<Headline[]> {
+export async function fetchAllHeadlines(): Promise<Headline[]> {
   const all: Headline[] = [];
   for (const f of FEEDS) {
     try {
@@ -63,15 +63,39 @@ export async function fetchHeadlines(keywords: string[], limit = 5): Promise<Hea
       // One dead feed should not kill the section.
     }
   }
-  const kw = keywords.map((k) => k.toLowerCase());
-  const matched = all.filter((h) => {
-    const t = h.title.toLowerCase();
-    return kw.some((k) => t.includes(k));
+  // Dedupe by URL across feeds, keep first occurrence, newest first.
+  const seen = new Set<string>();
+  const deduped = all.filter((h) => {
+    if (seen.has(h.url)) return false;
+    seen.add(h.url);
+    return true;
   });
-  matched.sort((a, b) => {
+  deduped.sort((a, b) => {
     const ta = a.publishedAt ? +new Date(a.publishedAt) : 0;
     const tb = b.publishedAt ? +new Date(b.publishedAt) : 0;
     return tb - ta;
   });
-  return matched.slice(0, limit);
+  return deduped;
+}
+
+/** First headline matching any keyword. Pass newest-first headlines. */
+export function matchHeadline(headlines: Headline[], keywords: string[]): Headline | null {
+  const kw = keywords.map((k) => k.toLowerCase()).filter(Boolean);
+  if (kw.length === 0) return null;
+  for (const h of headlines) {
+    const t = h.title.toLowerCase();
+    if (kw.some((k) => t.includes(k))) return h;
+  }
+  return null;
+}
+
+export async function fetchHeadlines(keywords: string[], limit = 5): Promise<Headline[]> {
+  const all = await fetchAllHeadlines();
+  const kw = keywords.map((k) => k.toLowerCase()).filter(Boolean);
+  return all
+    .filter((h) => {
+      const t = h.title.toLowerCase();
+      return kw.some((k) => t.includes(k));
+    })
+    .slice(0, limit);
 }

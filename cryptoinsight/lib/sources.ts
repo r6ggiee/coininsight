@@ -272,6 +272,9 @@ export interface TrendingData {
   losers7d: MoversSplit;
   gainers30d: MoversSplit;
   losers30d: MoversSplit;
+  /** Best-matched headline per mover coin id, explaining the move.
+   *  Coins with no match are absent. Populated by the refresh layer. */
+  spikes: Record<string, import("./news").Headline>;
   asOf: string;
 }
 
@@ -394,6 +397,7 @@ export async function fetchTrending(): Promise<TrendingData> {
     losers7d: { regular: l7.map(toTrendCoin), meme: ml7.map(toTrendCoin) },
     gainers30d: { regular: g30.map(toTrendCoin), meme: mg30.map(toTrendCoin) },
     losers30d: { regular: l30.map(toTrendCoin), meme: ml30.map(toTrendCoin) },
+    spikes: {},
     asOf: new Date().toISOString(),
   };
 }

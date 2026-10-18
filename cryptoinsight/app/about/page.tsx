@@ -11,7 +11,7 @@ export default function AboutPage() {
     <div>
       <div className="section-head">
         <h2>About CryptoInsight</h2>
-        <p>What it is, what it is not, and where it is going.</p>
+        <p>What it is and is not.</p>
       </div>
 
       <section className="card" style={{ marginBottom: "1.25rem" }}>
@@ -52,7 +52,7 @@ export default function AboutPage() {
       <section className="card">
         <h3>Contact</h3>
         <p>
-          For questions, feedback, or business inquiries: contact details coming soon.
+          Questions, feedback, or business inquiries: contact details coming soon.
         </p>
         <div style={{ marginTop: "1.25rem" }}>
           <Link href="/research" className="btn btn-primary">Back to research</Link>

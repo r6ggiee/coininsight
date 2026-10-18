@@ -19,7 +19,7 @@ export default async function MarketsPage() {
     <div>
       <div className="section-head">
         <h2>Markets</h2>
-        <p>Every tracked coin at a glance. Select a coin to open its full brief.</p>
+        <p>All tracked coins. Select one for its full brief.</p>
       </div>
 
       <div className="market-grid">
@@ -45,7 +45,7 @@ export default async function MarketsPage() {
 
       <div className="section-head">
         <h2>Trending</h2>
-        <p>What the market is searching for and moving on, refreshed with the data cycle.</p>
+        <p>What the market is searching and moving on.</p>
       </div>
       {trending ? (
         <TrendingSection data={trending} />

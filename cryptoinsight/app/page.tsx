@@ -6,6 +6,7 @@ import { getTrending } from "@/lib/refresh";
 import { fmtPct } from "@/lib/brief";
 import { briefHref } from "@/lib/links";
 import BriefView from "@/components/BriefView";
+import WatchlistSection from "@/components/WatchlistSection";
 
 export const metadata: Metadata = {
   title: "CryptoInsight: Layered crypto research",
@@ -57,6 +58,8 @@ export default async function HomePage() {
         </section>
       )}
 
+      <WatchlistSection />
+
       <section>
         <div className="section-head">
           <h2>How it works</h2>
@@ -84,7 +87,7 @@ export default async function HomePage() {
       <section>
         <div className="section-head">
           <h2>A real brief, not a mockup</h2>
-          <p>Sample BTC brief. Live briefs look exactly like this, with fresh data.</p>
+          <p>Sample BTC brief. Live briefs look the same, with fresh data.</p>
         </div>
         <BriefView brief={SAMPLE_BRIEF} />
         <div style={{ marginTop: "1.25rem" }}>

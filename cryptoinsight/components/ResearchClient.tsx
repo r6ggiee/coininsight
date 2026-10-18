@@ -90,7 +90,7 @@ export default function ResearchClient() {
     <div>
       <div className="section-head">
         <h2>Research</h2>
-        <p>Pick a coin, generate a layered brief. Data is fetched on the server and refreshes daily, with on-demand refresh when stale.</p>
+        <p>Pick a coin, generate a layered brief. Server-side data, refreshed daily and on demand.</p>
       </div>
 
       <CoinPicker label="Coin picker" value={value} onChange={setValue} />

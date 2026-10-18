@@ -153,6 +153,25 @@ Two actions: "Download image" saves the PNG, "Share" uses the Web Share API
 with the image file where the browser supports it and falls back to
 download otherwise. Works for any loaded brief, built-in or searched.
 
+## Spike explanations
+
+On the Markets page, every coin row in Top gainers and Top losers (Regular
+and Meme columns, 7d and 30d tabs) carries a one-line sub-row with the
+best-matched headline for the move: title, outlet, and relative time. The
+two RSS feeds are fetched once per data refresh and matched per mover coin
+with the existing keyword matcher; coins with no match show no sub-row,
+never a forced one.
+
+## Watchlist
+
+Star any coin to watch it. The star toggle sits on every coin picker chip
+and in the brief header (works for searched coins too). Storage is
+localStorage only (`cryptoinsight:watchlist`), no accounts, no backend.
+The home page has a "Your watchlist" section with live price and 24h
+change per starred coin (fetched client-side through the server-cached
+brief API, with skeletons while loading) linking to the full brief. Empty
+state reads "Star any coin to build your watchlist."
+
 ## Design notes
 
 - Accent color `#000388`, light/dark theme toggle persisted in localStorage.

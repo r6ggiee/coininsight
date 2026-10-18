@@ -48,15 +48,15 @@ export default function HowItWorksPage() {
             </tr>
           </thead>
           <tbody>
-            <tr><td>Binance.US</td><td>Hourly candles: price, RSI, moving averages, volatility</td><td>Every 30 min</td></tr>
-            <tr><td>Coinbase Exchange</td><td>Fallback hourly candles</td><td>Every 30 min</td></tr>
-            <tr><td>Kraken spot</td><td>Fallback hourly candles</td><td>Every 30 min</td></tr>
-            <tr><td>CoinGecko</td><td>Fallback prices, coin search, trending, 7d and 30d movers</td><td>Every 30 min</td></tr>
-            <tr><td>Kraken Futures</td><td>Perpetual funding rates (relative rate, the correct field)</td><td>Every 30 min</td></tr>
-            <tr><td>Alternative.me</td><td>Fear and Greed index</td><td>Every 30 min</td></tr>
-            <tr><td>mempool.space</td><td>Bitcoin fees, hash rate, difficulty</td><td>Every 30 min</td></tr>
-            <tr><td>Blockchair</td><td>Bitcoin and Ethereum network stats</td><td>Every 30 min</td></tr>
-            <tr><td>CoinTelegraph, Decrypt</td><td>News headlines via RSS, keyword-matched per coin</td><td>Every 30 min</td></tr>
+            <tr><td>Binance.US</td><td>Hourly candles: price, RSI, moving averages, volatility</td><td>Daily</td></tr>
+            <tr><td>Coinbase Exchange</td><td>Fallback hourly candles</td><td>Daily</td></tr>
+            <tr><td>Kraken spot</td><td>Fallback hourly candles</td><td>Daily</td></tr>
+            <tr><td>CoinGecko</td><td>Fallback prices, coin search, trending, 7d and 30d movers</td><td>Daily</td></tr>
+            <tr><td>Kraken Futures</td><td>Perpetual funding rates (relative rate, the correct field)</td><td>Daily</td></tr>
+            <tr><td>Alternative.me</td><td>Fear and Greed index</td><td>Daily</td></tr>
+            <tr><td>mempool.space</td><td>Bitcoin fees, hash rate, difficulty</td><td>Daily</td></tr>
+            <tr><td>Blockchair</td><td>Bitcoin and Ethereum network stats</td><td>Daily</td></tr>
+            <tr><td>CoinTelegraph, Decrypt</td><td>News headlines via RSS, keyword-matched per coin</td><td>Daily</td></tr>
           </tbody>
         </table>
       </section>

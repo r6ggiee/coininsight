@@ -58,5 +58,65 @@
     "briefAt": "2026-10-17T23:27:30.619Z",
     "lean": "bearish",
     "priceAtBrief": 0.00002349
+  },
+  {
+    "coin": "BTC",
+    "briefAt": "2026-10-18T03:54:19.154Z",
+    "lean": "bullish",
+    "priceAtBrief": 81884.54
+  },
+  {
+    "coin": "ETH",
+    "briefAt": "2026-10-18T03:54:19.154Z",
+    "lean": "neutral",
+    "priceAtBrief": 2423
+  },
+  {
+    "coin": "SOL",
+    "briefAt": "2026-10-18T03:54:19.154Z",
+    "lean": "bullish",
+    "priceAtBrief": 104.63
+  },
+  {
+    "coin": "XRP",
+    "briefAt": "2026-10-18T03:54:19.154Z",
+    "lean": "neutral",
+    "priceAtBrief": 1.3024
+  },
+  {
+    "coin": "DOGE",
+    "briefAt": "2026-10-18T03:54:19.154Z",
+    "lean": "neutral",
+    "priceAtBrief": 0.07983
+  },
+  {
+    "coin": "SHIB",
+    "briefAt": "2026-10-18T03:54:19.154Z",
+    "lean": "bearish",
+    "priceAtBrief": 0.000005
+  },
+  {
+    "coin": "PEPE",
+    "briefAt": "2026-10-18T03:54:19.154Z",
+    "lean": "bearish",
+    "priceAtBrief": 0.00000389
+  },
+  {
+    "coin": "BONK",
+    "briefAt": "2026-10-18T03:54:19.154Z",
+    "lean": "neutral",
+    "priceAtBrief": 0.000002988
+  },
+  {
+    "coin": "WIF",
+    "briefAt": "2026-10-18T03:54:19.154Z",
+    "lean": "neutral",
+    "priceAtBrief": 0.1998
+  },
+  {
+    "coin": "FLOKI",
+    "briefAt": "2026-10-18T03:54:19.154Z",
+    "lean": "neutral",
+    "priceAtBrief": 0.00002367
   }
 ]

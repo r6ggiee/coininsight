@@ -6,6 +6,7 @@ import { fmtPrice, fmtPct } from "@/lib/brief";
 import type { PickerValue } from "@/components/CoinPicker";
 import { compareParams } from "@/components/CoinPicker";
 import { renderShareCard, downloadPng, sharePng, CARD_W, CARD_H } from "@/lib/shareCard";
+import WatchlistButton from "@/components/WatchlistButton";
 
 function Stat({ label, value, tone }: { label: string; value: string; tone?: "pos" | "neg" }) {
   return (
@@ -172,6 +173,10 @@ export default function BriefView({ brief, pickerValue }: { brief: Brief; picker
       </section>
 
       <div className="brief-actions">
+        <span className="watch-action">
+          <WatchlistButton entry={thisSlot} />
+          <span className="watch-action-label">Watchlist</span>
+        </span>
         <button className="btn btn-ghost" onClick={copyBrief}>
           {copied ? "Copied" : "Copy brief"}
         </button>

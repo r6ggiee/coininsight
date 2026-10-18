@@ -38,15 +38,14 @@ export default function ScorecardPage() {
       <div>
         <div className="section-head">
           <h2>Scorecard</h2>
-          <p>The public track record of every brief: lean, price, and what happened 24 hours later.</p>
+          <p>Every brief's lean, price, and what happened 24 hours later.</p>
         </div>
         <div className="card">
           <h3 style={{ marginTop: 0 }}>No scored briefs yet</h3>
           <p>
-            Briefs are filed once a day and scored 24 hours later, so the first
-            results appear tomorrow. Check back then. Small sample sizes are
-            shown plainly here, never hidden, because a hit rate means nothing
-            without knowing how many briefs sit behind it.
+            Briefs are filed daily and scored 24 hours later, so the first
+            results appear tomorrow. Sample sizes are shown plainly: a hit rate
+            means nothing without the count behind it.
           </p>
         </div>
       </div>
@@ -58,10 +57,9 @@ export default function ScorecardPage() {
       <div className="section-head">
         <h2>Scorecard</h2>
         <p>
-          Every brief is filed with its directional lean and the price at the
-          time, then scored 24 hours later. Bullish counts as right when the
-          price is up more than 0.5%, bearish when it is down more than 0.5%,
-          neutral when the move stays under 1%.
+          Each brief is filed with its lean and price, then scored 24 hours
+          later: bullish is right if price rose over 0.5%, bearish if it fell
+          over 0.5%, neutral if the move stayed under 1%.
         </p>
       </div>
 

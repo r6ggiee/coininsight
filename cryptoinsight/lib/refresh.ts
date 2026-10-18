@@ -12,8 +12,9 @@ import {
   fetchTrending,
   fetchCoinGeckoCandles,
   type TrendingData,
+  type TrendCoin,
 } from "./sources";
-import { fetchHeadlines, type Headline } from "./news";
+import { fetchHeadlines, fetchAllHeadlines, matchHeadline, type Headline } from "./news";
 import { assembleBrief, verdictLean, type Brief } from "./brief";
 import { recordDaily, scoreDue } from "./scorecard";
 
@@ -218,7 +219,7 @@ export async function refreshAll(): Promise<RefreshSummary> {
   // Trending runs concurrently with the coin refreshes.
   const trendingJob = (async (): Promise<boolean> => {
     try {
-      const trending = await fetchTrending();
+      const trending = await attachSpikes(await fetchTrending());
       setCache("trending", trending);
       return true;
     } catch {
@@ -262,10 +263,36 @@ export async function getTrending(): Promise<TrendingData | null> {
   const cached = getCache<TrendingData>(key);
   if (cached && !isCacheStale(key, BRIEF_TTL_MS)) return cached.data;
   try {
-    const t = await fetchTrending();
+    const t = await attachSpikes(await fetchTrending());
     setCache(key, t);
     return t;
   } catch {
     return cached?.data ?? null;
+  }
+}
+
+/** Pin the best-matched headline onto each mover coin ("why it moved").
+ *  Feeds are fetched once and matched per coin; coins with no match are
+ *  left out. Never throws: on any failure the data passes through bare. */
+export async function attachSpikes(t: TrendingData): Promise<TrendingData> {
+  try {
+    const headlines = await fetchAllHeadlines();
+    if (headlines.length === 0) return t;
+    const seen = new Map<string, TrendCoin>();
+    for (const split of [t.gainers7d, t.losers7d, t.gainers30d, t.losers30d]) {
+      for (const c of [...split.regular, ...split.meme]) {
+        if (!seen.has(c.id)) seen.set(c.id, c);
+      }
+    }
+    const spikes: Record<string, Headline> = {};
+    for (const c of Array.from(seen.values())) {
+      const builtin = COINS.find((k) => k.id === c.symbol.toUpperCase());
+      const keywords = builtin ? builtin.keywords : [c.name.toLowerCase(), c.symbol.toLowerCase()];
+      const h = matchHeadline(headlines, keywords);
+      if (h) spikes[c.id] = h;
+    }
+    return { ...t, spikes };
+  } catch {
+    return t;
   }
 }
