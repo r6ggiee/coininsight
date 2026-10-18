@@ -165,12 +165,40 @@ never a forced one.
 ## Watchlist
 
 Star any coin to watch it. The star toggle sits on every coin picker chip
-and in the brief header (works for searched coins too). Storage is
-localStorage only (`cryptoinsight:watchlist`), no accounts, no backend.
+and in the brief header (works for searched coins too). Logged out, storage
+is localStorage only (`cryptoinsight:watchlist`), no backend. Signed in,
+stars also sync to the account's `watchlist_items` table, and signing in
+merges any local stars into the account (no duplicates).
 The home page has a "Your watchlist" section with live price and 24h
 change per starred coin (fetched client-side through the server-cached
 brief API, with skeletons while loading) linking to the full brief. Empty
 state reads "Star any coin to build your watchlist."
+
+## Accounts (Supabase)
+
+Accounts are optional: without them the site works exactly as before (auth
+UI hides itself, watchlist and theme stay local). To enable:
+
+1. Create a free project at https://supabase.com.
+2. In the Supabase dashboard: **SQL Editor -> New query**, paste the whole
+   `supabase/schema.sql` from this repo, and Run. This creates `profiles`,
+   `user_settings`, and `watchlist_items` with row-level security (users can
+   only touch their own rows) plus a trigger that builds the profile row on
+   signup.
+3. In Supabase: **Authentication -> Providers -> Email**. Turn OFF "Confirm
+   email" for the simplest sign-in flow (or leave it on; the login page
+   handles the check-your-email case).
+4. In Supabase: **Project Settings -> API**, copy the Project URL and the
+   `anon` public key.
+5. In Vercel: **Project Settings -> Environment Variables**, add
+   `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Production),
+   then redeploy. Locally, copy them into a `.env.local` file (see
+   `.env.example`).
+
+What accounts unlock: sign in via the header button, a user menu (avatar
+with initial -> Settings, Sign out), a `/settings` page (display name;
+theme Light/Dark/System, which drives the whole site), and watchlist sync
+across devices. Price alerts and brief history are still to come.
 
 ## Design notes
 

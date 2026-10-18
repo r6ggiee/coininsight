@@ -113,6 +113,30 @@ export async function fetchCoinGeckoCandles(coingeckoId: string): Promise<Candle
   );
 }
 
+/** Last-resort snapshot for coins with no chart history: current price and
+ *  24h change from CoinGecko's coin endpoint. Returns null when the coin has
+ *  no public market data at all. Never invents numbers. */
+export interface CoinSnapshot {
+  price: number | null;
+  change24h: number | null;
+  marketCap: number | null;
+}
+export async function fetchCoinGeckoSnapshot(coingeckoId: string): Promise<CoinSnapshot | null> {
+  const j = await fetchJson(
+    `https://api.coingecko.com/api/v3/coins/${encodeURIComponent(coingeckoId)}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false`
+  );
+  const md = j?.market_data;
+  if (!md) return null;
+  const price = typeof md.current_price?.usd === "number" ? md.current_price.usd : null;
+  if (price === null) return null;
+  const chg = md.price_change_percentage_24h;
+  return {
+    price,
+    change24h: typeof chg === "number" ? chg : null,
+    marketCap: typeof md.market_cap?.usd === "number" ? md.market_cap.usd : null,
+  };
+}
+
 export async function fetchCandleSeries(coin: CoinConfig): Promise<CandleSeries> {
   const log: string[] = [];
   const attempts: Array<{ name: string; fn: () => Promise<Candle[] | null>; hasVolume: boolean }> = [

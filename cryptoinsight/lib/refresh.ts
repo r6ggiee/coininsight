@@ -1,7 +1,7 @@
 // Refresh orchestration: fetches data for coins, assembles briefs, and
 // fills the cache. SERVER-SIDE ONLY.
 
-import { COINS, getCoin, type CoinConfig } from "./coins";
+import { COINS, getCoin, DISCLAIMER, type CoinConfig } from "./coins";
 import { getCache, setCache, isCacheStale, BRIEF_TTL_MS } from "./cache";
 import {
   fetchCandleSeries,
@@ -11,11 +11,12 @@ import {
   fetchEthOnChain,
   fetchTrending,
   fetchCoinGeckoCandles,
+  fetchCoinGeckoSnapshot,
   type TrendingData,
   type TrendCoin,
 } from "./sources";
 import { fetchHeadlines, fetchAllHeadlines, matchHeadline, type Headline } from "./news";
-import { assembleBrief, verdictLean, type Brief } from "./brief";
+import { assembleBrief, verdictLean, fmtPrice, fmtPct, type Brief } from "./brief";
 import { recordDaily, scoreDue } from "./scorecard";
 
 const briefKey = (id: string) => `brief:${id.toUpperCase()}`;
@@ -130,7 +131,60 @@ export async function getSearchedBrief(
     group: "majors",
   };
   const candles = await fetchCoinGeckoCandles(id);
-  if (!candles) throw new Error(`No price data found for ${name}`);
+  if (!candles) {
+    // No chart history: try a price snapshot so the coin still gets an
+    // honest brief instead of an error. Only fails when there is genuinely
+    // no public market data.
+    const snap = await fetchCoinGeckoSnapshot(id).catch(() => null);
+    if (!snap) throw new Error(`No price data found for ${name}`);
+    const headlines = await fetchHeadlines(pseudoCoin.keywords, 5).catch(() => []);
+    const chgTxt = snap.change24h === null
+      ? "with no 24 hour change figure available"
+      : snap.change24h >= 0 ? `up ${fmtPct(snap.change24h)}` : `down ${fmtPct(Math.abs(snap.change24h))}`;
+    const glance =
+      `${name} (${pseudoCoin.id}) is trading at $${fmtPrice(snap.price)}, ${chgTxt} over the last 24 hours. ` +
+      `There is no usable price history on record for this coin, so momentum gauges, moving averages, and trend reads are unavailable. ` +
+      `Nothing here is estimated or filled in: what follows is only what public sources actually report.`;
+    const brief: Brief = {
+      coin: pseudoCoin.id,
+      name,
+      asOf: new Date().toISOString(),
+      priceSource: "CoinGecko",
+      verdict: "Too little history for a read",
+      glance,
+      stats: {
+        price: snap.price, change24h: snap.change24h, rsi: null, sma20: null, sma50: null,
+        volPct: null, volLabel: "unavailable", high7d: null, low7d: null,
+        fundingRatePct: null, fundingAvg8hPct: null, fearGreed: null, fearGreedLabel: null,
+        priceSource: "CoinGecko",
+      },
+      sections: [
+        {
+          id: "price-action",
+          title: "Price action",
+          source: "CoinGecko",
+          paragraphs: [
+            `${name} is at $${fmtPrice(snap.price)}${snap.change24h === null ? "" : ` (${fmtPct(snap.change24h)} in 24 hours)`}${snap.marketCap !== null ? `, with a reported market cap of about $${snap.marketCap.toLocaleString("en-US", { maximumFractionDigits: 0 })}` : ""}. No hourly price history is available, so this brief cannot show a chart, RSI, moving averages, or volatility figures.`,
+            "Derivatives positioning, on-chain activity, and fear and greed context are unavailable for this coin. The headlines below are keyword-matched from crypto news feeds and may or may not explain the price.",
+          ],
+        },
+      ],
+      headlines,
+      headlinesNote: headlines.length
+        ? "Keyword-matched from crypto news feeds; not verified as the cause of any move."
+        : "No matching headlines found in crypto news feeds.",
+      closes: [],
+      feedLog: [
+        "CoinGecko chart: no usable history, snapshot used instead",
+        "Momentum, moving averages, volatility: unavailable, honestly labeled",
+        "Kraken Futures funding: unavailable for searched coins, section will be labeled",
+        `Headlines: ${headlines.length} matched`,
+      ],
+      disclaimer: DISCLAIMER,
+    };
+    setCache(key, brief);
+    return brief;
+  }
   let fg: { value: number; label: string } | null = null;
   try {
     fg = await fetchFearGreed();
