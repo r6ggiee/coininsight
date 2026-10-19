@@ -9,11 +9,9 @@ import UserMenu from "./UserMenu";
 const LINKS = [
   { href: "/", label: "Home" },
   { href: "/research", label: "Research" },
-  { href: "/compare", label: "Compare" },
   { href: "/markets", label: "Markets" },
+  { href: "/compare", label: "Compare" },
   { href: "/scorecard", label: "Scorecard" },
-  { href: "/how-it-works", label: "How it works" },
-  { href: "/about", label: "About" },
 ];
 
 export default function Header() {

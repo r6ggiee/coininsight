@@ -113,41 +113,43 @@ export default function BriefView({ brief, pickerValue }: { brief: Brief; picker
   };
 
   return (
-    <article className="brief" aria-label={`${brief.name} research brief`}>
+    <article className="brief" id="brief-top" aria-label={`${brief.name} research brief`}>
       <div className="brief-meta">
         Generated {timeAgo(brief.asOf)} &middot; Price source: {brief.priceSource}
       </div>
       <h2 className="verdict">{brief.verdict}</h2>
       <p className="glance">{brief.glance}</p>
 
-      <div className="stat-grid">
-        <Stat label="Price" value={`$${fmtPrice(s.price)}`} />
-        <Stat
-          label="24h change"
-          value={fmtPct(s.change24h)}
-          tone={s.change24h === null ? undefined : s.change24h >= 0 ? "pos" : "neg"}
-        />
-        <Stat label="RSI (14), momentum 0 to 100" value={s.rsi === null ? "n/a" : s.rsi.toFixed(0)} />
-        <Stat label="20h average" value={`$${fmtPrice(s.sma20)}`} />
-        <Stat label="50h average" value={`$${fmtPrice(s.sma50)}`} />
-        <Stat label={`Volatility, ${s.volLabel}`} value={s.volPct === null ? "n/a" : `${s.volPct.toFixed(2)}%`} />
-        <Stat label="7 day high" value={`$${fmtPrice(s.high7d)}`} />
-        <Stat label="7 day low" value={`$${fmtPrice(s.low7d)}`} />
-        <Stat
-          label="Funding rate, per hour"
-          value={fmtPct(s.fundingRatePct)}
-          tone={s.fundingRatePct === null ? undefined : s.fundingRatePct > 0.01 ? "pos" : s.fundingRatePct < -0.01 ? "neg" : undefined}
-        />
-        <Stat label="Fear and Greed" value={s.fearGreed === null ? "n/a" : `${s.fearGreed} ${s.fearGreedLabel ?? ""}`.trim()} />
-      </div>
+      <div className={tvSymbol ? "brief-overview" : undefined}>
+        <div className="stat-grid">
+          <Stat label="Price" value={`$${fmtPrice(s.price)}`} />
+          <Stat
+            label="24h change"
+            value={fmtPct(s.change24h)}
+            tone={s.change24h === null ? undefined : s.change24h >= 0 ? "pos" : "neg"}
+          />
+          <Stat label="RSI (14), momentum 0 to 100" value={s.rsi === null ? "n/a" : s.rsi.toFixed(0)} />
+          <Stat label="20h average" value={`$${fmtPrice(s.sma20)}`} />
+          <Stat label="50h average" value={`$${fmtPrice(s.sma50)}`} />
+          <Stat label={`Volatility, ${s.volLabel}`} value={s.volPct === null ? "n/a" : `${s.volPct.toFixed(2)}%`} />
+          <Stat label="7 day high" value={`$${fmtPrice(s.high7d)}`} />
+          <Stat label="7 day low" value={`$${fmtPrice(s.low7d)}`} />
+          <Stat
+            label="Funding rate, per hour"
+            value={fmtPct(s.fundingRatePct)}
+            tone={s.fundingRatePct === null ? undefined : s.fundingRatePct > 0.01 ? "pos" : s.fundingRatePct < -0.01 ? "neg" : undefined}
+          />
+          <Stat label="Fear and Greed" value={s.fearGreed === null ? "n/a" : `${s.fearGreed} ${s.fearGreedLabel ?? ""}`.trim()} />
+        </div>
 
-      {tvSymbol && (
-        <section className="brief-section" aria-label="Price chart">
-          <h3>Price chart</h3>
-          <div className="source-note">TradingView</div>
-          <TradingViewChart symbol={tvSymbol} />
-        </section>
-      )}
+        {tvSymbol && (
+          <section className="brief-chart-side" id="brief-chart" aria-label="Price chart">
+            <h3>Price chart</h3>
+            <div className="source-note">TradingView</div>
+            <TradingViewChart symbol={tvSymbol} />
+          </section>
+        )}
+      </div>
 
       {brief.sections.map((sec, i) => (
         <section key={sec.id} className="brief-section" aria-label={sec.title}>
@@ -161,7 +163,7 @@ export default function BriefView({ brief, pickerValue }: { brief: Brief; picker
         </section>
       ))}
 
-      <section className="brief-section" aria-label="Latest headlines">
+      <section className="brief-section" id="brief-news" aria-label="Latest headlines">
         <h3>6. Latest headlines</h3>
         <div className="source-note">CoinTelegraph and Decrypt RSS, keyword-matched</div>
         {brief.headlines.length > 0 ? (

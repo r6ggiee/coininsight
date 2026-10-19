@@ -53,7 +53,7 @@ a:hover { text-decoration: underline; }
 .page {
   max-width: 1080px;
   margin: 0 auto;
-  padding: 2rem 1.25rem 4rem;
+  padding: 3rem 1.25rem 5rem;
   animation: pageIn 0.35s ease both;
 }
 
@@ -248,7 +248,8 @@ a:hover { text-decoration: underline; }
   margin-bottom: 0.75rem;
 }
 
-.section-head { margin: 3rem 0 1.25rem; }
+.section-head { margin: 4rem 0 1.75rem; }
+.section-head:first-child { margin-top: 0; }
 .section-head h2 { margin: 0 0 0.25rem; font-size: 1.6rem; letter-spacing: -0.01em; }
 .section-head p { margin: 0; color: var(--muted); }
 
@@ -357,13 +358,13 @@ a:hover { text-decoration: underline; }
   margin: 0 0 0.75rem;
   color: var(--accent-text);
 }
-.glance { font-size: 1.05rem; margin: 0 0 1.5rem; }
+.glance { font-size: 1.05rem; margin: 0 0 2.25rem; }
 
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 0.75rem;
-  margin-bottom: 1.75rem;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
 }
 .stat {
   background: var(--surface-2);
@@ -375,7 +376,46 @@ a:hover { text-decoration: underline; }
 .pos { color: var(--green); }
 .neg { color: var(--red); }
 
-.brief-section { border-top: 1px solid var(--border); padding: 1.25rem 0; }
+.brief-section { border-top: 1px solid var(--border); padding: 2.25rem 0; scroll-margin-top: 7rem; }
+#brief-top { scroll-margin-top: 7rem; }
+#brief-history { scroll-margin-top: 7rem; }
+
+html { scroll-behavior: smooth; }
+
+/* Sticky tab bar for jumping between brief sections. */
+.brief-tabs {
+  position: sticky;
+  top: 3.6rem;
+  z-index: 40;
+  display: flex;
+  gap: 0.25rem;
+  margin: 1.5rem -1.25rem 0;
+  padding: 0.6rem 1.25rem;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+.brief-tabs a {
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+.brief-tabs a:hover { background: var(--accent-soft); color: var(--text); text-decoration: none; }
+
+/* Chart and key stats side by side on desktop, stacked on mobile. */
+.brief-overview { margin-bottom: 0.5rem; }
+.brief-chart-side h3 { margin: 0 0 0.15rem; font-size: 1.15rem; }
+@media (min-width: 900px) {
+  .brief-overview {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
+    gap: 2.5rem;
+    align-items: start;
+  }
+  .brief-overview .stat-grid { margin-bottom: 0; }
+}
 .brief-section h3 { margin: 0 0 0.15rem; font-size: 1.15rem; }
 .source-note { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.6rem; }
 .brief-section p { margin: 0.5rem 0; }
@@ -410,7 +450,7 @@ a:hover { text-decoration: underline; }
   color: var(--muted);
 }
 
-.brief-actions { display: flex; gap: 0.6rem; margin-top: 1.25rem; flex-wrap: wrap; }
+.brief-actions { display: flex; gap: 0.75rem; margin-top: 2rem; flex-wrap: wrap; }
 
 /* Skeleton */
 
@@ -426,7 +466,7 @@ a:hover { text-decoration: underline; }
 
 /* Markets */
 
-.market-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+.market-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; }
 .market-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -436,7 +476,36 @@ a:hover { text-decoration: underline; }
   transition: transform 0.18s ease;
   color: var(--text);
 }
-.market-card:hover { transform: translateY(-4px); text-decoration: none; }
+.market-card:hover { transform: translateY(-4px); }
+.market-card .mc-toggle {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+.market-card .mc-chevron {
+  display: block;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin-top: 0.35rem;
+}
+.market-card .mc-detail {
+  border-top: 1px solid var(--border);
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+}
+.market-card .mc-brief-link {
+  display: inline-block;
+  margin-top: 0.6rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
 .market-card .mc-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.25rem; }
 .market-card .mc-name { font-weight: 800; font-size: 1.05rem; }
 .market-card .mc-price { font-size: 1.25rem; font-weight: 800; }
@@ -527,7 +596,22 @@ a:hover { text-decoration: underline; }
 .footer-inner { max-width: 1080px; margin: 0 auto; padding: 2rem 1.25rem; }
 .footer-brand { display: flex; flex-direction: column; margin-bottom: 0.75rem; }
 .footer-disclaimer { font-size: 0.88rem; color: var(--muted); margin: 0 0 0.25rem; }
-.footer-note { font-size: 0.8rem; color: var(--muted); margin: 0; }
+.footer-note { font-size: 0.8rem; color: var(--muted); margin: 0 0 1rem; }
+.footer-nav { display: flex; gap: 1.25rem; }
+.footer-nav a { font-size: 0.88rem; font-weight: 600; color: var(--muted); }
+.footer-nav a:hover { color: var(--accent-text); text-decoration: none; }
+
+/* Text-style sign in link in the header, visually matching the nav links. */
+.nav-signin {
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background 0.2s ease, color 0.2s ease;
+  white-space: nowrap;
+}
+.nav-signin:hover { background: var(--accent-soft); color: var(--text); text-decoration: none; }
 
 /* Utility */
 

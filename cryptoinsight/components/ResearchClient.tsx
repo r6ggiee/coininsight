@@ -7,6 +7,7 @@ import BriefView from "@/components/BriefView";
 import BriefHistory from "@/components/BriefHistory";
 import CoinPicker, { type PickerValue, briefQuery } from "@/components/CoinPicker";
 import { getCoin } from "@/lib/coins";
+import { tvSymbolFor } from "@/components/TradingViewChart";
 
 const DEFAULT_COIN: PickerValue = { kind: "coin", id: "BTC", symbol: "BTC", name: "Bitcoin" };
 
@@ -127,10 +128,21 @@ export default function ResearchClient() {
         </div>
       )}
 
+      {brief && !loading && (
+        <nav className="brief-tabs" aria-label="Brief sections">
+          <a href="#brief-top">Brief</a>
+          {tvSymbolFor(brief.coin) && <a href="#brief-chart">Chart</a>}
+          {value.kind === "coin" && <a href="#brief-history">History</a>}
+          <a href="#brief-news">News</a>
+        </nav>
+      )}
+
       {brief && !loading && <BriefView brief={brief} pickerValue={value} />}
 
       {brief && !loading && value.kind === "coin" && (
-        <BriefHistory coin={value.id} name={value.name} />
+        <div id="brief-history">
+          <BriefHistory coin={value.id} name={value.name} />
+        </div>
       )}
 
       {brief && !loading && value.kind === "search" && (

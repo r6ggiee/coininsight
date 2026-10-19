@@ -71,7 +71,7 @@ export default function UserMenu() {
 
   if (!user) {
     return (
-      <Link href="/login" className="btn btn-primary btn-sm">
+      <Link href="/login" className="nav-signin">
         Sign in
       </Link>
     );

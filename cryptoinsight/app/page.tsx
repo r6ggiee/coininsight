@@ -38,7 +38,7 @@ export default async function HomePage() {
           </div>
         </div>
         <div className="hero-art">
-          <img src="/art/hero.jpg" alt="Abstract visualization of crypto market data in deep blue" />
+          <img src="/art/hero.jpg" alt="Dark ocean wave curling under a moody sky" />
         </div>
       </section>
 
@@ -110,7 +110,7 @@ export default async function HomePage() {
       </section>
 
       <section className="band">
-        <img src="/art/accent-network.jpg" alt="Abstract network of glowing connections in deep blue" />
+        <img src="/art/accent-network.jpg" alt="Sunlight filtering through a dense evergreen forest" />
         <div className="band-overlay">
           <h2>For teams and companies</h2>
           <p>

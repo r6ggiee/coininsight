@@ -41,6 +41,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               Educational research only - not financial advice. No buy/sell recommendation is made or implied.
             </p>
             <p className="footer-note">Data refreshes daily from free public sources, and stale data is refreshed on demand.</p>
+            <nav className="footer-nav" aria-label="Footer">
+              <a href="/how-it-works">How it works</a>
+              <a href="/about">About</a>
+            </nav>
           </div>
         </footer>
       </body>
