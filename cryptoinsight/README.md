@@ -174,6 +174,52 @@ change per starred coin (fetched client-side through the server-cached
 brief API, with skeletons while loading) linking to the full brief. Empty
 state reads "Star any coin to build your watchlist."
 
+## Brief history
+
+The Research page shows a "Past briefs" section under each tracked coin's
+brief: pick a date to read what the verdict and analysis said that day.
+History covers the 10 built-in coins only (not searched coins), starts
+accumulating from the day this feature deploys, and is never backfilled.
+
+Setup (Supabase). The SQL editor may be broken on some projects; these steps
+use the dashboard UI instead. The exact SQL is in `supabase/brief_history.sql`
+for reference.
+
+1. **Table Editor -> New table**, name `brief_history`, enable Row Level
+   Security. Columns:
+   - `id`: uuid, Primary key, default `gen_random_uuid()`
+   - `coin_symbol`: text, required
+   - `coin_name`: text, required
+   - `brief_date`: date, required
+   - `verdict`: text, required
+   - `glance`: text, required
+   - `price`: numeric, nullable
+   - `created_at`: timestamptz, default `now()`
+   Then add a unique constraint on (`coin_symbol`, `brief_date`). In the
+   Table Editor, open the table -> the settings/constraints area -> add a
+   unique constraint covering both columns. (If the UI does not offer it,
+   the upsert still works but duplicate rows are possible; the API reads the
+   newest.)
+2. **Database -> Policies**, find `brief_history`, **Create policy** twice:
+   - Name `read history (authenticated)`, Command SELECT, Target Roles
+     `authenticated`, USING expression: `true`
+   - Name `read history (anon)`, Command SELECT, Target Roles `anon`,
+     USING expression: `true`
+   No write policies are needed: the daily writer uses the service_role key,
+   which bypasses RLS.
+3. In Supabase: **Project Settings -> API**, copy the `service_role` key
+   (labeled "Secret" in the new API keys UI). In Vercel: **Project Settings
+   -> Environment Variables**, add `SUPABASE_SERVICE_ROLE_KEY` (Production,
+   Secret type), then redeploy. Never expose this key to the browser.
+4. The daily cron (`/api/refresh`) saves each built-in coin's fresh brief
+   automatically. It skips saving silently when the key is missing, so the
+   refresh never breaks.
+
+API: `GET /api/history?coin=BTC` returns `[{ date, verdict, price }]`
+newest first; `GET /api/history?coin=BTC&date=YYYY-MM-DD` returns the full
+archived brief. Both return `[]` (never an error) when Supabase is
+unconfigured or the table is empty.
+
 ## Accounts (Supabase)
 
 Accounts are optional: without them the site works exactly as before (auth

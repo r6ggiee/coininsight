@@ -7,6 +7,7 @@ import type { PickerValue } from "@/components/CoinPicker";
 import { compareParams } from "@/components/CoinPicker";
 import { renderShareCard, downloadPng, sharePng, CARD_W, CARD_H } from "@/lib/shareCard";
 import WatchlistButton from "@/components/WatchlistButton";
+import TradingViewChart, { tvSymbolFor } from "@/components/TradingViewChart";
 
 function Stat({ label, value, tone }: { label: string; value: string; tone?: "pos" | "neg" }) {
   return (
@@ -33,6 +34,8 @@ export default function BriefView({ brief, pickerValue }: { brief: Brief; picker
   const [cardBusy, setCardBusy] = useState(false);
   const [cardError, setCardError] = useState<string | null>(null);
   const s = brief.stats;
+  // Prototype: embedded TradingView chart, BTC and ETH only.
+  const tvSymbol = tvSymbolFor(brief.coin);
 
   // "Compare this coin": preselect the current coin in slot A, ETH (or BTC
   // when the current coin is ETH) in slot B.
@@ -137,6 +140,14 @@ export default function BriefView({ brief, pickerValue }: { brief: Brief; picker
         />
         <Stat label="Fear and Greed" value={s.fearGreed === null ? "n/a" : `${s.fearGreed} ${s.fearGreedLabel ?? ""}`.trim()} />
       </div>
+
+      {tvSymbol && (
+        <section className="brief-section" aria-label="Price chart">
+          <h3>Price chart</h3>
+          <div className="source-note">TradingView</div>
+          <TradingViewChart symbol={tvSymbol} />
+        </section>
+      )}
 
       {brief.sections.map((sec, i) => (
         <section key={sec.id} className="brief-section" aria-label={sec.title}>

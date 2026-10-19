@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { Brief } from "@/lib/brief";
 import BriefView from "@/components/BriefView";
+import BriefHistory from "@/components/BriefHistory";
 import CoinPicker, { type PickerValue, briefQuery } from "@/components/CoinPicker";
 import { getCoin } from "@/lib/coins";
 
@@ -127,6 +128,16 @@ export default function ResearchClient() {
       )}
 
       {brief && !loading && <BriefView brief={brief} pickerValue={value} />}
+
+      {brief && !loading && value.kind === "coin" && (
+        <BriefHistory coin={value.id} name={value.name} />
+      )}
+
+      {brief && !loading && value.kind === "search" && (
+        <p className="muted" style={{ fontSize: "0.85rem", marginTop: "2.5rem" }}>
+          Brief history is only kept for tracked coins.
+        </p>
+      )}
     </div>
   );
 }

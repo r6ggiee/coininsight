@@ -308,6 +308,15 @@ export async function refreshAll(): Promise<RefreshSummary> {
   } catch {
     // scorecard is best-effort; the refresh itself already succeeded
   }
+  // Brief history: save one brief per coin per UTC day for the archive.
+  // Best-effort and silent: never fails the refresh when the service key
+  // is missing or Supabase is unreachable.
+  try {
+    const { saveBriefHistory } = await import("./history");
+    await saveBriefHistory(freshBriefs, new Date());
+  } catch {
+    // history is best-effort; the refresh itself already succeeded
+  }
   return { refreshed, failed, trendingOk, asOf: new Date().toISOString() };
 }
 

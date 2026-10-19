@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getSummary } from "@/lib/scorecard";
+import { getDbSummary } from "@/lib/scorecardDb";
 
 export const metadata: Metadata = {
   title: "Scorecard: CryptoInsight",
@@ -30,8 +31,9 @@ function fmtDate(iso: string | undefined): string {
   });
 }
 
-export default function ScorecardPage() {
-  const s = getSummary();
+export default async function ScorecardPage() {
+  // Durable store first (Supabase brief_history), local JSON store fallback.
+  const s = (await getDbSummary()) ?? getSummary();
 
   if (s.overall.scored === 0) {
     return (
@@ -43,9 +45,10 @@ export default function ScorecardPage() {
         <div className="card">
           <h3 style={{ marginTop: 0 }}>No scored briefs yet</h3>
           <p>
-            Briefs are filed daily and scored 24 hours later, so the first
-            results appear tomorrow. Sample sizes are shown plainly: a hit rate
-            means nothing without the count behind it.
+            Briefs are archived daily and each one is scored against the next
+            day's price. The first results appear once two days of briefs are
+            on file. Sample sizes are shown plainly: a hit rate means nothing
+            without the count behind it.
           </p>
         </div>
       </div>

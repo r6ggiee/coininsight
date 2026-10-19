@@ -230,6 +230,12 @@ a:hover { text-decoration: underline; }
 }
 .card:hover { transform: translateY(-4px); }
 .card h3 { margin: 0 0 0.5rem; font-size: 1.1rem; }
+/* Archived brief: visually quieter than a live brief, read-only. */
+.history-card {
+  border-style: dashed;
+  box-shadow: none;
+}
+.history-card:hover { transform: none; }
 .card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
 .card .step-num {
   display: inline-flex;
@@ -373,6 +379,14 @@ a:hover { text-decoration: underline; }
 .brief-section h3 { margin: 0 0 0.15rem; font-size: 1.15rem; }
 .source-note { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.6rem; }
 .brief-section p { margin: 0.5rem 0; }
+
+/* TradingView prototype chart: fixed height so the autosized widget fills it. */
+.tv-chart { height: 440px; width: 100%; }
+.tv-chart .tradingview-widget-copyright { font-size: 0.75rem; text-align: center; padding-top: 0.4rem; }
+.tv-chart .tradingview-widget-copyright a { color: var(--muted); text-decoration: none; }
+@media (max-width: 760px) {
+  .tv-chart { height: 340px; }
+}
 
 .headline-list { list-style: none; margin: 0.75rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.6rem; }
 .headline-list li {
