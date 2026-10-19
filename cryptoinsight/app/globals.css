@@ -811,3 +811,105 @@ a.btn-sm:hover { text-decoration: none; }
 .theme-choice.active { border-color: var(--accent-text); background: var(--accent-soft); }
 .theme-choice strong { font-size: 0.95rem; }
 .theme-choice .muted { font-size: 0.8rem; }
+
+/* Asset toggle: Crypto / Stocks segmented control */
+.asset-toggle {
+  display: inline-flex;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.25rem;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+.asset-toggle-btn {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.5rem 1.25rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.asset-toggle-btn:hover { color: var(--text); }
+.asset-toggle-btn.selected { background: var(--accent); color: var(--accent-ink); }
+
+/* Subtle text button, e.g. the stat explainer trigger */
+.link-btn {
+  border: none;
+  background: none;
+  color: var(--accent-text);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.25rem 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.link-btn:hover { color: var(--text); }
+.stat-explainer-row { margin: 0.5rem 0 0; }
+
+/* Stat explainer modal */
+.explainer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 100;
+}
+.explainer-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  max-width: 34rem;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  outline: none;
+}
+.explainer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.explainer-head h3 { margin: 0; font-size: 1.15rem; }
+.explainer-close {
+  border: none;
+  background: var(--accent-soft);
+  color: var(--text);
+  font-size: 1.4rem;
+  line-height: 1;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.explainer-close:hover { background: var(--border); }
+.explainer-list { margin: 0; display: flex; flex-direction: column; gap: 0.9rem; }
+.explainer-item dt { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.15rem; }
+.explainer-item dd { margin: 0; font-size: 0.92rem; color: var(--muted); line-height: 1.5; }
+
+/* Watchlist type badge */
+.wc-badge {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 1;
+  padding: 0.22rem 0.35rem;
+  border-radius: 0.35rem;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  margin-left: 0.4rem;
+  vertical-align: middle;
+}
+.wc-badge.stock { background: rgba(30, 126, 52, 0.12); color: #1e7e34; }
+[data-theme="dark"] .wc-badge.stock { background: rgba(125, 223, 154, 0.14); color: #7ddf9a; }

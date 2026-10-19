@@ -4,7 +4,38 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getWatchlist, WATCHLIST_EVENT, type WatchEntry } from "@/lib/watchlist";
 import { briefQuery, researchLink } from "@/components/CoinPicker";
+import { stockBriefQuery, stockResearchLink } from "@/components/StockPicker";
 import { fmtPrice, fmtPct } from "@/lib/brief";
+
+function isStockEntry(e: WatchEntry): boolean {
+  return e.assetType === "stock" || e.kind === "stock" || e.kind === "stock-search";
+}
+
+function entryBriefQuery(e: WatchEntry): string {
+  if (isStockEntry(e)) {
+    return stockBriefQuery({
+      kind: e.kind === "stock-search" ? "stock-search" : "stock",
+      id: e.id,
+      symbol: e.symbol,
+      name: e.name,
+    });
+  }
+  const kind = e.kind === "search" ? "search" : "coin";
+  return briefQuery({ kind, id: e.id, symbol: e.symbol, name: e.name });
+}
+
+function entryResearchLink(e: WatchEntry): string {
+  if (isStockEntry(e)) {
+    return stockResearchLink({
+      kind: e.kind === "stock-search" ? "stock-search" : "stock",
+      id: e.id,
+      symbol: e.symbol,
+      name: e.name,
+    });
+  }
+  const kind = e.kind === "search" ? "search" : "coin";
+  return researchLink({ kind, id: e.id, symbol: e.symbol, name: e.name });
+}
 
 interface Quote {
   price: number | null;
@@ -12,7 +43,10 @@ interface Quote {
 }
 
 function keyOf(e: WatchEntry): string {
-  return e.kind === "search" ? `search:${e.id}` : `coin:${e.symbol.toUpperCase()}`;
+  const at = isStockEntry(e) ? "stock" : "crypto";
+  return e.kind === "search" || e.kind === "stock-search"
+    ? `${at}:search:${e.id}`
+    : `${at}:${e.symbol.toUpperCase()}`;
 }
 
 /** "Your watchlist" home section. Reads localStorage, fetches a live quote
@@ -41,7 +75,7 @@ export default function WatchlistSection() {
         entries.map(async (e) => {
           const k = keyOf(e);
           try {
-            const res = await fetch(briefQuery(e));
+            const res = await fetch(entryBriefQuery(e));
             const b = await res.json();
             q[k] = {
               price: typeof b?.stats?.price === "number" ? b.stats.price : null,
@@ -74,7 +108,7 @@ export default function WatchlistSection() {
       ) : entries.length === 0 ? (
         <div className="watch-empty">
           <span className="watch-empty-star" aria-hidden="true">☆</span>
-          <p>Star any coin to build your watchlist.</p>
+          <p>Star any coin or stock to build your watchlist.</p>
         </div>
       ) : (
         <div className="watch-grid">
@@ -82,10 +116,16 @@ export default function WatchlistSection() {
             const k = keyOf(e);
             const q = quotes[k];
             const chg = q?.change24h ?? null;
+            const stock = isStockEntry(e);
             return (
-              <Link key={k} href={researchLink(e)} className="watch-card">
+              <Link key={k} href={entryResearchLink(e)} className="watch-card">
                 <span className="wc-top">
-                  <span className="wc-sym">{e.symbol}</span>
+                  <span className="wc-sym">
+                    {e.symbol}
+                    <span className={`wc-badge${stock ? " stock" : ""}`} title={stock ? "Stock" : "Crypto"}>
+                      {stock ? "S" : "C"}
+                    </span>
+                  </span>
                   <span className={`wc-chg ${chg === null ? "" : chg >= 0 ? "pos" : "neg"}`}>
                     {q ? fmtPct(chg) : "···"}
                   </span>

@@ -5,10 +5,13 @@ import type { Brief } from "@/lib/brief";
 import { fmtPrice, fmtPct } from "@/lib/brief";
 import type { PickerValue } from "@/components/CoinPicker";
 import { compareParams } from "@/components/CoinPicker";
+import type { StockPickerValue } from "@/components/StockPicker";
 import { renderShareCard, downloadPng, sharePng, CARD_W, CARD_H } from "@/lib/shareCard";
 import WatchlistButton from "@/components/WatchlistButton";
-import TradingViewChart, { tvSymbolFor } from "@/components/TradingViewChart";
+import TradingViewChart, { tvSymbolFor, tvStockSymbolFor } from "@/components/TradingViewChart";
 import PriceChart from "@/components/PriceChart";
+import StatExplainer from "@/components/StatExplainer";
+import { stockCompareParams } from "@/components/StockPicker";
 
 function Stat({ label, value, tone }: { label: string; value: string; tone?: "pos" | "neg" }) {
   return (
@@ -29,31 +32,50 @@ function timeAgo(iso: string): string {
   return `${Math.floor(h / 24)} days ago`;
 }
 
-export default function BriefView({ brief, pickerValue }: { brief: Brief; pickerValue?: PickerValue }) {
+export default function BriefView({ brief, pickerValue }: { brief: Brief; pickerValue?: PickerValue | StockPickerValue }) {
   const [copied, setCopied] = useState(false);
   const [cardUrl, setCardUrl] = useState<string | null>(null);
   const [cardBusy, setCardBusy] = useState(false);
   const [cardError, setCardError] = useState<string | null>(null);
+  const [showExplainer, setShowExplainer] = useState(false);
   const s = brief.stats;
-  const tvSymbol = tvSymbolFor(brief.coin);
+  const isStock = brief.assetType === "stock";
+  const tvSymbol = isStock ? tvStockSymbolFor(brief.coin) : tvSymbolFor(brief.coin);
   // If the TradingView embed fails (e.g. ad blocker), fall back to the
   // custom chart so the section never renders empty.
   const [tvFailed, setTvFailed] = useState(false);
   const useTv = tvSymbol && !tvFailed;
 
-  // "Compare this coin": preselect the current coin in slot A, ETH (or BTC
-  // when the current coin is ETH) in slot B.
-  const otherSlot: PickerValue =
-    brief.coin === "ETH"
-      ? { kind: "coin", id: "BTC", symbol: "BTC", name: "Bitcoin" }
-      : { kind: "coin", id: "ETH", symbol: "ETH", name: "Ethereum" };
-  const thisSlot: PickerValue = pickerValue ?? {
-    kind: "coin",
-    id: brief.coin,
-    symbol: brief.coin,
-    name: brief.name,
-  };
-  const compareHref = `/compare?${compareParams(thisSlot, otherSlot)}`;
+  // "Compare": preselect the current asset in slot A and a sensible peer
+  // in slot B. Stocks stay in the stock lane (?asset=stocks).
+  const compareHref = (() => {
+    if (isStock) {
+      const other =
+        brief.coin === "AAPL"
+          ? { kind: "stock" as const, id: "MSFT", symbol: "MSFT", name: "Microsoft Corp." }
+          : { kind: "stock" as const, id: "AAPL", symbol: "AAPL", name: "Apple Inc." };
+      const thisSlot =
+        pickerValue && (pickerValue.kind === "stock" || pickerValue.kind === "stock-search")
+          ? pickerValue
+          : { kind: "stock" as const, id: brief.coin, symbol: brief.coin, name: brief.name };
+      return `/compare?${stockCompareParams(thisSlot, other)}`;
+    }
+    const otherSlot: PickerValue =
+      brief.coin === "ETH"
+        ? { kind: "coin", id: "BTC", symbol: "BTC", name: "Bitcoin" }
+        : { kind: "coin", id: "ETH", symbol: "ETH", name: "Ethereum" };
+    const pv = pickerValue as PickerValue | undefined;
+    const thisSlot: PickerValue =
+      pv && (pv.kind === "coin" || pv.kind === "search")
+        ? pv
+        : {
+            kind: "coin",
+            id: brief.coin,
+            symbol: brief.coin,
+            name: brief.name,
+          };
+    return `/compare?${compareParams(thisSlot, otherSlot)}`;
+  })();
 
   const openCard = () => {
     setCardError(null);
@@ -128,22 +150,42 @@ export default function BriefView({ brief, pickerValue }: { brief: Brief; picker
         <div className="stat-grid">
           <Stat label="Price" value={`$${fmtPrice(s.price)}`} />
           <Stat
-            label="24h change"
+            label={isStock ? "Day change" : "24h change"}
             value={fmtPct(s.change24h)}
             tone={s.change24h === null ? undefined : s.change24h >= 0 ? "pos" : "neg"}
           />
           <Stat label="RSI (14), momentum 0 to 100" value={s.rsi === null ? "n/a" : s.rsi.toFixed(0)} />
-          <Stat label="20h average" value={`$${fmtPrice(s.sma20)}`} />
-          <Stat label="50h average" value={`$${fmtPrice(s.sma50)}`} />
+          <Stat label={isStock ? "20d average" : "20h average"} value={`$${fmtPrice(s.sma20)}`} />
+          <Stat label={isStock ? "50d average" : "50h average"} value={`$${fmtPrice(s.sma50)}`} />
           <Stat label={`Volatility, ${s.volLabel}`} value={s.volPct === null ? "n/a" : `${s.volPct.toFixed(2)}%`} />
-          <Stat label="7 day high" value={`$${fmtPrice(s.high7d)}`} />
-          <Stat label="7 day low" value={`$${fmtPrice(s.low7d)}`} />
-          <Stat
-            label="Funding rate, per hour"
-            value={fmtPct(s.fundingRatePct)}
-            tone={s.fundingRatePct === null ? undefined : s.fundingRatePct > 0.01 ? "pos" : s.fundingRatePct < -0.01 ? "neg" : undefined}
-          />
-          <Stat label="Fear and Greed" value={s.fearGreed === null ? "n/a" : `${s.fearGreed} ${s.fearGreedLabel ?? ""}`.trim()} />
+          {isStock ? (
+            <>
+              <Stat label="52w high" value={`$${fmtPrice(s.high52w)}`} />
+              <Stat label="52w low" value={`$${fmtPrice(s.low52w)}`} />
+              <Stat label="P/E ratio" value="n/a" />
+              <Stat label="Market cap" value="n/a" />
+            </>
+          ) : (
+            <>
+              <Stat label="7 day high" value={`$${fmtPrice(s.high7d)}`} />
+              <Stat label="7 day low" value={`$${fmtPrice(s.low7d)}`} />
+              <Stat
+                label="Funding rate, per hour"
+                value={fmtPct(s.fundingRatePct)}
+                tone={s.fundingRatePct === null ? undefined : s.fundingRatePct > 0.01 ? "pos" : s.fundingRatePct < -0.01 ? "neg" : undefined}
+              />
+              <Stat label="Fear and Greed" value={s.fearGreed === null ? "n/a" : `${s.fearGreed} ${s.fearGreedLabel ?? ""}`.trim()} />
+            </>
+          )}
+        </div>
+        <div className="stat-explainer-row">
+          <button
+            type="button"
+            className="link-btn"
+            onClick={() => setShowExplainer(true)}
+          >
+            What do these numbers mean?
+          </button>
         </div>
 
         {brief.closes.length > 1 && (
@@ -172,8 +214,10 @@ export default function BriefView({ brief, pickerValue }: { brief: Brief; picker
       ))}
 
       <section className="brief-section" id="brief-news" aria-label="Latest headlines">
-        <h3>6. Latest headlines</h3>
-        <div className="source-note">CoinTelegraph and Decrypt RSS, keyword-matched</div>
+        <h3>{brief.sections.length + 1}. Latest headlines</h3>
+        <div className="source-note">
+          {isStock ? "CNBC RSS, keyword-matched" : "CoinTelegraph and Decrypt RSS, keyword-matched"}
+        </div>
         {brief.headlines.length > 0 ? (
           <ul className="headline-list">
             {brief.headlines.map((h, i) => (
@@ -195,7 +239,24 @@ export default function BriefView({ brief, pickerValue }: { brief: Brief; picker
 
       <div className="brief-actions">
         <span className="watch-action">
-          <WatchlistButton entry={thisSlot} />
+          <WatchlistButton
+            entry={
+              isStock
+                ? {
+                    kind: pickerValue?.kind === "stock-search" ? "stock-search" : "stock",
+                    id: brief.coin,
+                    symbol: brief.coin,
+                    name: brief.name,
+                    assetType: "stock",
+                  }
+                : (pickerValue ?? {
+                    kind: "coin",
+                    id: brief.coin,
+                    symbol: brief.coin,
+                    name: brief.name,
+                  })
+            }
+          />
           <span className="watch-action-label">Watchlist</span>
         </span>
         <button className="btn btn-ghost" onClick={copyBrief}>
@@ -205,7 +266,7 @@ export default function BriefView({ brief, pickerValue }: { brief: Brief; picker
           {cardBusy ? "Rendering" : "Share card"}
         </button>
         <a className="btn btn-ghost" href={compareHref}>
-          Compare this coin
+          {isStock ? "Compare this stock" : "Compare this coin"}
         </a>
       </div>
 
@@ -251,6 +312,13 @@ export default function BriefView({ brief, pickerValue }: { brief: Brief; picker
       </details>
 
       <div className="disclaimer-box">{brief.disclaimer}</div>
+
+      {showExplainer && (
+        <StatExplainer
+          assetType={isStock ? "stock" : "crypto"}
+          onClose={() => setShowExplainer(false)}
+        />
+      )}
     </article>
   );
 }

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { COINS } from "@/lib/coins";
 import WatchlistButton from "@/components/WatchlistButton";
-import type { WatchEntry } from "@/lib/watchlist";
 
 export interface PickerValue {
   kind: "coin" | "search";
@@ -71,7 +70,7 @@ export default function CoinPicker({ label, value, onChange }: CoinPickerProps) 
           <div className="chip-group-label">{g.label}</div>
           <div className="chips" role="group" aria-label={`${label}: ${g.label}`}>
             {COINS.filter((c) => c.group === g.key).map((c) => {
-              const entry: WatchEntry = { kind: "coin", id: c.id, symbol: c.id, name: c.name };
+              const entry: PickerValue = { kind: "coin", id: c.id, symbol: c.id, name: c.name };
               const selected = value?.kind === "coin" && value.id === c.id;
               return (
                 <span key={c.id} className="chip-wrap">

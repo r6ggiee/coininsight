@@ -23,6 +23,14 @@ export function tvSymbolFor(coin: string): string | null {
   return TV_SYMBOLS[coin] ?? null;
 }
 
+/** TradingView symbol for a stock ticker (all US equities trade on
+ *  NASDAQ/NYSE in TradingView's symbology). */
+export function tvStockSymbolFor(ticker: string): string | null {
+  const t = ticker.toUpperCase().trim();
+  if (!/^[A-Z.]{1,6}$/.test(t)) return null;
+  return `NASDAQ:${t}`;
+}
+
 function currentTheme(): "light" | "dark" {
   try {
     return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";

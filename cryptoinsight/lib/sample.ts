@@ -7,6 +7,7 @@ import { DISCLAIMER } from "./coins";
 export const SAMPLE_BRIEF: Brief = {
   coin: "BTC",
   name: "Bitcoin",
+  assetType: "crypto",
   asOf: "2026-10-17T22:02:00.000Z",
   priceSource: "Binance.US",
   verdict: "Downtrend, unconfirmed by positioning",
@@ -27,6 +28,7 @@ export const SAMPLE_BRIEF: Brief = {
     fearGreed: 55,
     fearGreedLabel: "Greed",
     priceSource: "Binance.US",
+    high52w: null, low52w: null, peRatio: null, marketCap: null,
   },
   sections: [
     {

@@ -111,14 +111,20 @@ export function renderShareCard(brief: Brief): HTMLCanvasElement {
   ctx.stroke();
   y += 46;
 
-  // Stat blocks: RSI, funding rate, 7d change, volatility.
+  // Stat blocks: RSI, funding rate (crypto) or 52w high (stocks), 7d change, volatility.
   // 7d change needs ~7 days of hourly data (168 points); use up to 168h
   // back so an exact week of data counts instead of showing n/a.
   const nCloses = brief.closes.length;
-  const chg7 = s && nCloses >= 160 ? changePct(brief.closes, Math.min(168, nCloses - 1)) : null;
+  const isStock = brief.assetType === "stock";
+  // Crypto: 7 days of hourly data (168 points). Stocks: 7 daily closes.
+  const chg7 = isStock
+    ? (s && nCloses >= 8 ? changePct(brief.closes, 7) : null)
+    : (s && nCloses >= 160 ? changePct(brief.closes, Math.min(168, nCloses - 1)) : null);
   const stats: Array<{ label: string; value: string; color?: string }> = [
     { label: "RSI (14)", value: s.rsi === null ? "n/a" : s.rsi.toFixed(0) },
-    { label: "Funding / hr", value: fmtPct(s.fundingRatePct) },
+    isStock
+      ? { label: "52w high", value: `$${fmtPrice(s.high52w)}` }
+      : { label: "Funding / hr", value: fmtPct(s.fundingRatePct) },
     {
       label: "7d change",
       value: fmtPct(chg7),

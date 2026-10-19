@@ -31,6 +31,12 @@ export interface BriefStats {
   fearGreed: number | null;
   fearGreedLabel: string | null;
   priceSource: string;
+  /** Stocks only. Crypto briefs set these to null. */
+  high52w: number | null;
+  low52w: number | null;
+  /** Unavailable from the free Yahoo feed; always null for now. Shown as n/a. */
+  peRatio: number | null;
+  marketCap: number | null;
 }
 
 export interface BriefSection {
@@ -43,6 +49,8 @@ export interface BriefSection {
 export interface Brief {
   coin: string;
   name: string;
+  /** "crypto" or "stock". Drives which stats/sections render. */
+  assetType: "crypto" | "stock";
   asOf: string;
   priceSource: string;
   verdict: string;
@@ -74,7 +82,7 @@ export function fmtInt(n: number | null): string {
   return Math.round(n).toLocaleString("en-US");
 }
 
-function rsiWord(r: number | null): string {
+export function rsiWord(r: number | null): string {
   if (r === null) return "unavailable";
   if (r < 30) return "weak, near oversold";
   if (r < 40) return "soft, leaning weak";
@@ -178,6 +186,7 @@ export function assembleBrief(input: BriefInput): Brief {
     fearGreed: fg?.value ?? null,
     fearGreedLabel: fg?.label ?? null,
     priceSource,
+    high52w: null, low52w: null, peRatio: null, marketCap: null,
   };
 
   const sections: BriefSection[] = [];
@@ -330,6 +339,7 @@ export function assembleBrief(input: BriefInput): Brief {
   return {
     coin: coin.id,
     name: coin.name,
+    assetType: "crypto",
     asOf: new Date().toISOString(),
     priceSource,
     verdict,

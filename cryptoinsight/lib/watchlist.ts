@@ -1,14 +1,16 @@
 // Watchlist: localStorage only. No accounts, no backend, no network.
 // CLIENT-SIDE ONLY (uses localStorage).
 
-/** One watched coin. Same shape as the picker's value so brief links and
+/** One watched asset. Same shape as the picker's value so brief links and
  *  API queries can be built directly with researchLink()/briefQuery(). */
 export interface WatchEntry {
-  kind: "coin" | "search";
-  /** Built-ins: coin id (BTC). Searched: CoinGecko id. */
+  kind: "coin" | "search" | "stock" | "stock-search";
+  /** Built-ins: coin id (BTC) or ticker (AAPL). Searched: CoinGecko id or ticker. */
   id: string;
   symbol: string;
   name: string;
+  /** Defaults to "crypto" for entries saved before stocks existed. */
+  assetType?: "crypto" | "stock";
 }
 
 const KEY = "cryptoinsight:watchlist";
@@ -16,7 +18,9 @@ const KEY = "cryptoinsight:watchlist";
 export const WATCHLIST_EVENT = "cryptoinsight:watchlist";
 
 function entryId(e: WatchEntry): string {
-  return e.kind === "search" ? `search:${e.id}` : `coin:${e.symbol.toUpperCase()}`;
+  const at = e.assetType === "stock" ? "stock" : "crypto";
+  if (e.kind === "search" || e.kind === "stock-search") return `${at}:search:${e.id}`;
+  return `${at}:${e.kind}:${e.symbol.toUpperCase()}`;
 }
 
 export function getWatchlist(): WatchEntry[] {
@@ -41,7 +45,7 @@ export function toggleWatch(e: WatchEntry): boolean {
   const list = getWatchlist();
   const next = list.some((w) => entryId(w) === id)
     ? list.filter((w) => entryId(w) !== id)
-    : [...list, { kind: e.kind, id: e.id, symbol: e.symbol, name: e.name }];
+    : [...list, { kind: e.kind, id: e.id, symbol: e.symbol, name: e.name, assetType: e.assetType ?? "crypto" }];
   try {
     localStorage.setItem(KEY, JSON.stringify(next));
   } catch {

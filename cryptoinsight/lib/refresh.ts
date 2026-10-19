@@ -148,6 +148,7 @@ export async function getSearchedBrief(
     const brief: Brief = {
       coin: pseudoCoin.id,
       name,
+      assetType: "crypto",
       asOf: new Date().toISOString(),
       priceSource: "CoinGecko",
       verdict: "Too little history for a read",
@@ -157,6 +158,7 @@ export async function getSearchedBrief(
         volPct: null, volLabel: "unavailable", high7d: null, low7d: null,
         fundingRatePct: null, fundingAvg8hPct: null, fearGreed: null, fearGreedLabel: null,
         priceSource: "CoinGecko",
+        high52w: null, low52w: null, peRatio: null, marketCap: null,
       },
       sections: [
         {

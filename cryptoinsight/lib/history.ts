@@ -3,7 +3,8 @@ import type { Brief } from "./brief";
 import { supabaseUrl } from "./supabase/index";
 
 /** Brief-history storage (Supabase). History accumulates from deploy day;
- *  there is no backfill, and the UI is honest about that. */
+ *  there is no backfill, and the UI is honest about that.
+ *  Crypto only for v1: stock briefs are never saved here. */
 
 export interface HistoryEntry {
   date: string; // YYYY-MM-DD

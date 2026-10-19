@@ -220,6 +220,33 @@ newest first; `GET /api/history?coin=BTC&date=YYYY-MM-DD` returns the full
 archived brief. Both return `[]` (never an error) when Supabase is
 unconfigured or the table is empty.
 
+## Stocks
+
+The Research page has a Crypto/Stocks toggle at the top. Everything below it
+switches: the asset picker, the search backend, and the brief rendering.
+Crypto and stocks never mix.
+
+Stock data comes from Yahoo Finance (free, no key): the v8 chart API for
+daily OHLC + volume and 52-week range, the v1 search API for ticker lookup,
+CNBC RSS for headlines. Yahoo's quote endpoints now require auth, so P/E
+ratio and market cap are unavailable from the free feed and show as n/a
+rather than estimates.
+
+Stock briefs reuse the layered brief structure with stock-appropriate
+content: price action, fundamentals (52-week range in plain English),
+and a "Not covered for stocks" note explaining why funding rates and
+on-chain data are omitted. The Compare page has the same toggle and allows
+stock-vs-stock comparison; cross-type comparison is refused with an honest
+note. Brief history and the scorecard are crypto-only for v1.
+
+The watchlist is unified with a type badge (C for crypto, S for stock).
+Optional DB upgrade: add an `asset_type` text column (default `'crypto'`)
+to `watchlist_items` via the Table Editor UI. The app works without it
+(upserts retry without the column); with it, the type syncs to the cloud.
+
+Every brief has a "What do these numbers mean?" button that opens a plain
+English explainer for each stat. The content adapts to crypto vs stocks.
+
 ## Accounts (Supabase)
 
 Accounts are optional: without them the site works exactly as before (auth

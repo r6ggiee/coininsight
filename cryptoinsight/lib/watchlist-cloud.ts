@@ -14,13 +14,17 @@ export function cloudId(e: WatchEntry): string {
   return (coin?.coingeckoId ?? e.symbol).toLowerCase();
 }
 
-function toRow(userId: string, e: WatchEntry) {
-  return {
+function toRow(userId: string, e: WatchEntry, withAssetType: boolean) {
+  const row: Record<string, string> = {
     user_id: userId,
     coin_symbol: e.symbol,
     coin_name: e.name,
     coingecko_id: cloudId(e),
   };
+  // asset_type column is optional: the user adds it via the Table Editor UI.
+  // When missing, the upsert fails and we retry without it (crypto default).
+  if (withAssetType) row.asset_type = e.assetType === "stock" ? "stock" : "crypto";
+  return row;
 }
 
 /** After sign-in: insert any local entries missing from the DB. Never deletes. */
@@ -38,9 +42,15 @@ export async function mergeWatchlistToCloud(supabase: SupabaseClient): Promise<v
   const have = new Set((rows ?? []).map((r: { coingecko_id: string }) => r.coingecko_id));
   const missing = local.filter((e) => !have.has(cloudId(e)));
   if (missing.length === 0) return;
-  const { error } = await supabase
+  let { error } = await supabase
     .from("watchlist_items")
-    .upsert(missing.map((e) => toRow(user.id, e)), { onConflict: "user_id,coingecko_id" });
+    .upsert(missing.map((e) => toRow(user.id, e, true)), { onConflict: "user_id,coingecko_id" });
+  if (error) {
+    // asset_type column probably missing: retry without it.
+    ({ error } = await supabase
+      .from("watchlist_items")
+      .upsert(missing.map((e) => toRow(user.id, e, false)), { onConflict: "user_id,coingecko_id" }));
+  }
   if (error) throw error;
 }
 
@@ -55,9 +65,14 @@ export async function pushToggleToCloud(
   } = await supabase.auth.getUser();
   if (!user) return;
   if (watched) {
-    const { error } = await supabase
+    let { error } = await supabase
       .from("watchlist_items")
-      .upsert([toRow(user.id, entry)], { onConflict: "user_id,coingecko_id" });
+      .upsert([toRow(user.id, entry, true)], { onConflict: "user_id,coingecko_id" });
+    if (error) {
+      ({ error } = await supabase
+        .from("watchlist_items")
+        .upsert([toRow(user.id, entry, false)], { onConflict: "user_id,coingecko_id" }));
+    }
     if (error) throw error;
   } else {
     const { error } = await supabase
