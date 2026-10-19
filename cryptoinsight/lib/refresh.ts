@@ -336,6 +336,23 @@ export async function getTrending(): Promise<TrendingData | null> {
   }
 }
 
+/** Lightweight spike headlines for the Markets page: fetch headlines once
+ *  and match against the built-in coins. No CoinGecko trending work. */
+export async function getMarketSpikes(): Promise<Record<string, Headline>> {
+  try {
+    const headlines = await fetchAllHeadlines();
+    if (headlines.length === 0) return {};
+    const spikes: Record<string, Headline> = {};
+    for (const c of COINS) {
+      const h = matchHeadline(headlines, c.keywords);
+      if (h) spikes[c.id] = h;
+    }
+    return spikes;
+  } catch {
+    return {};
+  }
+}
+
 /** Pin the best-matched headline onto each mover coin ("why it moved").
  *  Feeds are fetched once and matched per coin; coins with no match are
  *  left out. Never throws: on any failure the data passes through bare. */

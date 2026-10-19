@@ -216,3 +216,54 @@ export async function fetchStockHeadlines(keywords: string[], limit = 5): Promis
   }
   return out;
 }
+
+export interface StockOverview {
+  ticker: string;
+  name: string;
+  price: number | null;
+  changePct: number | null;
+  high52w: number | null;
+  low52w: number | null;
+  /** Last ~30 daily closes for the sparkline. */
+  closes: number[];
+}
+
+const STOCKS_OVERVIEW_TTL_MS = 5 * 60 * 1000;
+let stocksOverviewCache: { data: StockOverview[]; asOf: number } | null = null;
+
+/** Overview of all built-in stocks for the Markets page. Parallel Yahoo
+ *  fetches with per-ticker failure isolation; 5-minute in-memory cache. */
+export async function getStocksOverview(): Promise<StockOverview[]> {
+  if (stocksOverviewCache && Date.now() - stocksOverviewCache.asOf < STOCKS_OVERVIEW_TTL_MS) {
+    return stocksOverviewCache.data;
+  }
+  const rows = await Promise.all(
+    STOCKS.map(async (s): Promise<StockOverview> => {
+      try {
+        const r = await fetchStockCandles(s.ticker);
+        if (!r) throw new Error("no data");
+        return {
+          ticker: s.ticker,
+          name: s.name,
+          price: r.meta.price,
+          changePct: r.meta.changePct,
+          high52w: r.meta.high52w,
+          low52w: r.meta.low52w,
+          closes: r.candles.slice(-30).map((c) => c.c),
+        };
+      } catch {
+        return {
+          ticker: s.ticker,
+          name: s.name,
+          price: null,
+          changePct: null,
+          high52w: null,
+          low52w: null,
+          closes: [],
+        };
+      }
+    })
+  );
+  stocksOverviewCache = { data: rows, asOf: Date.now() };
+  return rows;
+}
