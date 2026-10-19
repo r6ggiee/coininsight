@@ -8,6 +8,7 @@ import { compareParams } from "@/components/CoinPicker";
 import { renderShareCard, downloadPng, sharePng, CARD_W, CARD_H } from "@/lib/shareCard";
 import WatchlistButton from "@/components/WatchlistButton";
 import TradingViewChart, { tvSymbolFor } from "@/components/TradingViewChart";
+import PriceChart from "@/components/PriceChart";
 
 function Stat({ label, value, tone }: { label: string; value: string; tone?: "pos" | "neg" }) {
   return (
@@ -34,8 +35,11 @@ export default function BriefView({ brief, pickerValue }: { brief: Brief; picker
   const [cardBusy, setCardBusy] = useState(false);
   const [cardError, setCardError] = useState<string | null>(null);
   const s = brief.stats;
-  // Prototype: embedded TradingView chart, BTC and ETH only.
   const tvSymbol = tvSymbolFor(brief.coin);
+  // If the TradingView embed fails (e.g. ad blocker), fall back to the
+  // custom chart so the section never renders empty.
+  const [tvFailed, setTvFailed] = useState(false);
+  const useTv = tvSymbol && !tvFailed;
 
   // "Compare this coin": preselect the current coin in slot A, ETH (or BTC
   // when the current coin is ETH) in slot B.
@@ -120,7 +124,7 @@ export default function BriefView({ brief, pickerValue }: { brief: Brief; picker
       <h2 className="verdict">{brief.verdict}</h2>
       <p className="glance">{brief.glance}</p>
 
-      <div className={tvSymbol ? "brief-overview" : undefined}>
+      <div className="brief-overview">
         <div className="stat-grid">
           <Stat label="Price" value={`$${fmtPrice(s.price)}`} />
           <Stat
@@ -142,11 +146,15 @@ export default function BriefView({ brief, pickerValue }: { brief: Brief; picker
           <Stat label="Fear and Greed" value={s.fearGreed === null ? "n/a" : `${s.fearGreed} ${s.fearGreedLabel ?? ""}`.trim()} />
         </div>
 
-        {tvSymbol && (
+        {brief.closes.length > 1 && (
           <section className="brief-chart-side" id="brief-chart" aria-label="Price chart">
             <h3>Price chart</h3>
-            <div className="source-note">TradingView</div>
-            <TradingViewChart symbol={tvSymbol} />
+            <div className="source-note">{useTv ? "TradingView" : "Hourly closes"}</div>
+            {useTv ? (
+              <TradingViewChart symbol={tvSymbol} onFail={() => setTvFailed(true)} />
+            ) : (
+              <PriceChart closes={brief.closes} />
+            )}
           </section>
         )}
       </div>

@@ -2,14 +2,23 @@
 
 import { useEffect, useRef, useState } from "react";
 
-// Prototype: only these coins get an embedded chart. Everything else renders
-// no chart section at all.
+// TradingView symbols for the built-in coins. Searched coins fall through to
+// the custom PriceChart. If a mapping ever stops resolving, set it to null
+// and the custom chart takes over.
 const TV_SYMBOLS: Record<string, string> = {
   BTC: "BINANCE:BTCUSDT",
   ETH: "BINANCE:ETHUSDT",
+  SOL: "BINANCE:SOLUSDT",
+  XRP: "BINANCE:XRPUSDT",
+  DOGE: "BINANCE:DOGEUSDT",
+  SHIB: "BINANCE:SHIBUSDT",
+  PEPE: "BINANCE:PEPEUSDT",
+  BONK: "BINANCE:BONKUSDT",
+  WIF: "BINANCE:WIFUSDT",
+  FLOKI: "BINANCE:FLOKIUSDT",
 };
 
-/** TradingView symbol for a coin, or null when the prototype covers no chart. */
+/** TradingView symbol for a coin, or null to use the custom fallback chart. */
 export function tvSymbolFor(coin: string): string | null {
   return TV_SYMBOLS[coin] ?? null;
 }
@@ -23,8 +32,9 @@ function currentTheme(): "light" | "dark" {
 }
 
 /** TradingView Advanced Real-Time Chart embed. Re-renders when the site theme
- *  changes. Renders nothing if the TradingView script fails to load. */
-export default function TradingViewChart({ symbol }: { symbol: string }) {
+ *  changes. Calls onFail if the TradingView script fails to load so the
+ *  parent can fall back to the custom chart. */
+export default function TradingViewChart({ symbol, onFail }: { symbol: string; onFail?: () => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [failed, setFailed] = useState(false);
 
@@ -71,7 +81,10 @@ export default function TradingViewChart({ symbol }: { symbol: string }) {
       script.async = true;
       script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
       script.onerror = () => {
-        if (!disposed) setFailed(true);
+        if (!disposed) {
+          setFailed(true);
+          onFail?.();
+        }
       };
       script.textContent = JSON.stringify({
         allow_symbol_change: false,
