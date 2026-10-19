@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStock } from "@/lib/stocks";
-import { fetchStockCandles, fetchStockHeadlines } from "@/lib/stocks";
+import { fetchStockCandles, fetchStockHeadlines, fetchStockFundamentals } from "@/lib/stocks";
 import { buildStockBrief } from "@/lib/stockBrief";
 import { getCache, setCache, isCacheStale } from "@/lib/cache";
 import type { Brief } from "@/lib/brief";
@@ -17,16 +17,18 @@ async function buildBrief(ticker: string, name: string, keywords: string[]): Pro
   const data = await fetchStockCandles(ticker);
   if (!data) throw new Error(`No price data found for ${ticker}`);
   const headlines = await fetchStockHeadlines(keywords, 5).catch(() => []);
+  const fund = await fetchStockFundamentals(ticker).catch(() => ({ peRatio: null, marketCap: null }));
+  const fundOk = fund.peRatio !== null || fund.marketCap !== null;
   const brief = buildStockBrief({
     ticker: data.meta.ticker,
     name: data.meta.name !== data.meta.ticker ? data.meta.name : name,
     candles: data.candles,
-    meta: data.meta,
+    meta: { ...data.meta, ...fund },
     headlines,
     feedLog: [
       `Yahoo Finance chart: ok (${data.candles.length} daily points)`,
       `Headlines: ${headlines.length} matched (CNBC)`,
-      "P/E and market cap: unavailable from the free feed, shown as n/a",
+      fundOk ? "Finnhub fundamentals: ok (P/E, market cap)" : "Finnhub fundamentals: unavailable, shown as n/a",
     ],
   });
   setCache(key, brief);

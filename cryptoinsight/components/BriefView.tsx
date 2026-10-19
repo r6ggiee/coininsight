@@ -22,6 +22,14 @@ function Stat({ label, value, tone }: { label: string; value: string; tone?: "po
   );
 }
 
+function fmtBig(n: number | null): string {
+  if (n === null || !isFinite(n)) return "n/a";
+  if (n >= 1e12) return `$${(n / 1e12).toFixed(2)}T`;
+  if (n >= 1e9) return `$${(n / 1e9).toFixed(2)}B`;
+  if (n >= 1e6) return `$${(n / 1e6).toFixed(2)}M`;
+  return `$${n.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
+}
+
 function timeAgo(iso: string): string {
   const s = Math.max(0, Math.floor((Date.now() - +new Date(iso)) / 1000));
   if (s < 60) return "just now";
@@ -162,8 +170,8 @@ export default function BriefView({ brief, pickerValue }: { brief: Brief; picker
             <>
               <Stat label="52w high" value={`$${fmtPrice(s.high52w)}`} />
               <Stat label="52w low" value={`$${fmtPrice(s.low52w)}`} />
-              <Stat label="P/E ratio" value="n/a" />
-              <Stat label="Market cap" value="n/a" />
+              <Stat label="P/E ratio" value={s.peRatio === null ? "n/a" : s.peRatio.toFixed(2)} />
+              <Stat label="Market cap" value={fmtBig(s.marketCap)} />
             </>
           ) : (
             <>

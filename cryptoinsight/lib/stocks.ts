@@ -1,9 +1,9 @@
 // Stocks via Yahoo Finance (free, no key). SERVER-SIDE ONLY.
 // The v8 chart API is the workhorse: OHLC + volume + useful meta (price,
 // 52-week range, company name). The v1 search API powers ticker lookup.
-// Note: Yahoo's quote endpoints (v7/v10) now require auth, so P/E and
-// market cap are NOT available from the free feed. We show them as n/a
-// rather than inventing numbers.
+// Yahoo's quote endpoints (v7/v10) now require auth, so P/E and market cap
+// come from Finnhub instead (fetchStockFundamentals, FINNHUB_API_KEY).
+// When Finnhub is missing or fails, both show as n/a rather than invented.
 
 import type { Candle } from "./indicators";
 
@@ -47,9 +47,9 @@ export interface StockMeta {
   low52w: number | null;
   volume: number | null;
   currency: string;
-  /** P/E and market cap are unavailable from the free feed (auth-blocked). */
-  peRatio: null;
-  marketCap: null;
+  /** P/E (TTM) and market cap, filled by fetchStockFundamentals when available. */
+  peRatio: number | null;
+  marketCap: number | null;
 }
 
 /** Daily candles (up to ~1y) plus quote meta for a ticker. */
@@ -119,6 +119,41 @@ export async function searchStocks(query: string): Promise<StockSearchResult[]> 
       name: String(r.shortname || r.longname || r.symbol),
       exchange: String(r.exchange || ""),
     }));
+}
+
+// ---------------------------------------------------------------------------
+// Stock fundamentals: Finnhub (needs FINNHUB_API_KEY, server-side only).
+// Returns nulls when the key is missing or the request fails, never throws.
+// ---------------------------------------------------------------------------
+
+export interface StockFundamentals {
+  peRatio: number | null;
+  marketCap: number | null;
+}
+
+export async function fetchStockFundamentals(ticker: string): Promise<StockFundamentals> {
+  const none: StockFundamentals = { peRatio: null, marketCap: null };
+  const key = process.env.FINNHUB_API_KEY;
+  const t = ticker.toUpperCase().trim();
+  if (!key || !t) return none;
+  try {
+    const res = await fetch(
+      `https://finnhub.io/api/v1/stock/metric?symbol=${encodeURIComponent(t)}&metric=all&token=${encodeURIComponent(key)}`,
+      { signal: AbortSignal.timeout(15000) }
+    );
+    if (!res.ok) return none;
+    const j = await res.json();
+    const m = j?.metric ?? {};
+    const num = (v: unknown): number | null =>
+      typeof v === "number" && isFinite(v) && v > 0 ? v : null;
+    const capMillions = num(m.marketCapitalization);
+    return {
+      peRatio: num(m.peTTM),
+      marketCap: capMillions === null ? null : capMillions * 1e6,
+    };
+  } catch {
+    return none;
+  }
 }
 
 // ---------------------------------------------------------------------------

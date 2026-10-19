@@ -228,9 +228,11 @@ Crypto and stocks never mix.
 
 Stock data comes from Yahoo Finance (free, no key): the v8 chart API for
 daily OHLC + volume and 52-week range, the v1 search API for ticker lookup,
-CNBC RSS for headlines. Yahoo's quote endpoints now require auth, so P/E
-ratio and market cap are unavailable from the free feed and show as n/a
-rather than estimates.
+CNBC RSS for headlines. P/E ratio and market cap come from Finnhub, which
+needs a free API key: set `FINNHUB_API_KEY` in Vercel (Production,
+server-side only; never expose it to the client) or in `.env.local` for
+local dev. Without the key, P/E and market cap show as n/a rather than
+estimates.
 
 Stock briefs reuse the layered brief structure with stock-appropriate
 content: price action, fundamentals (52-week range in plain English),

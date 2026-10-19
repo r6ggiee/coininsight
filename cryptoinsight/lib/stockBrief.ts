@@ -105,8 +105,8 @@ export function buildStockBrief(input: StockBriefInput): Brief {
     priceSource: "Yahoo Finance",
     high52w: meta.high52w,
     low52w: meta.low52w,
-    peRatio: null,
-    marketCap: null,
+    peRatio: meta.peRatio,
+    marketCap: meta.marketCap,
   };
 
   const sections: BriefSection[] = [];
@@ -134,10 +134,12 @@ export function buildStockBrief(input: StockBriefInput): Brief {
   sections.push({
     id: "fundamentals",
     title: "Fundamentals",
-    source: "Yahoo Finance",
+    source: "Yahoo Finance, Finnhub",
     paragraphs: [
       w52,
-      "The P/E ratio (price divided by yearly earnings per share) and market cap (total value of all shares) are not available from the free data feed used here, so they are shown as n/a rather than estimated. A future data upgrade can fill these in.",
+      meta.peRatio !== null || meta.marketCap !== null
+        ? `The P/E ratio (price divided by yearly earnings per share) is ${meta.peRatio === null ? "n/a" : meta.peRatio.toFixed(2)}, and the market cap (total value of all shares) is ${fmtBig(meta.marketCap)}.`
+        : "The P/E ratio (price divided by yearly earnings per share) and market cap (total value of all shares) are not available on this refresh, so they are shown as n/a rather than estimated.",
     ],
   });
 
