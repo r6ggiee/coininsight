@@ -44,6 +44,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <nav className="footer-nav" aria-label="Footer">
               <a href="/how-it-works">How it works</a>
               <a href="/about">About</a>
+              <a href="/for-business">For Business</a>
+              <a href="/contact">Contact</a>
+              <a href="/privacy">Privacy</a>
+              <a href="/terms">Terms</a>
             </nav>
           </div>
         </footer>

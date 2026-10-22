@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getSummary } from "@/lib/scorecard";
 import { getDbSummary } from "@/lib/scorecardDb";
+import { fmtPrice } from "@/lib/brief";
 
 export const metadata: Metadata = {
   title: "Scorecard: CryptoInsight",
@@ -13,13 +14,6 @@ export const dynamic = "force-dynamic";
 
 function pct(rate: number | null): string {
   return rate === null ? "n/a" : `${(rate * 100).toFixed(1)}%`;
-}
-
-function fmtPrice(p: number | undefined): string {
-  if (typeof p !== "number" || !isFinite(p)) return "n/a";
-  return p >= 1000
-    ? p.toLocaleString("en-US", { maximumFractionDigits: 2 })
-    : p.toLocaleString("en-US", { maximumFractionDigits: 4 });
 }
 
 function fmtDate(iso: string | undefined): string {
@@ -146,8 +140,8 @@ export default async function ScorecardPage() {
                 <td style={{ textAlign: "left", fontWeight: 700 }}>{e.coin}</td>
                 <td style={{ textAlign: "left" }}>{fmtDate(e.briefAt)}</td>
                 <td style={{ textAlign: "left", textTransform: "capitalize" }}>{e.lean}</td>
-                <td>${fmtPrice(e.priceAtBrief)}</td>
-                <td>${fmtPrice(e.priceAtScore)}</td>
+                <td>${fmtPrice(e.priceAtBrief ?? null)}</td>
+                <td>${fmtPrice(e.priceAtScore ?? null)}</td>
                 <td className={e.outcome === "right" ? "pos" : "neg"} style={{ fontWeight: 700 }}>
                   {e.outcome === "right" ? "Right" : "Wrong"}
                 </td>

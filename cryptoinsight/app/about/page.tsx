@@ -52,7 +52,8 @@ export default function AboutPage() {
       <section className="card">
         <h3>Contact</h3>
         <p>
-          Questions, feedback, or business inquiries: contact details coming soon.
+          Questions, feedback, or business inquiries: see our{" "}
+          <Link href="/contact">contact page</Link> for how to reach us.
         </p>
         <div style={{ marginTop: "1.25rem" }}>
           <Link href="/research" className="btn btn-primary">Back to research</Link>
