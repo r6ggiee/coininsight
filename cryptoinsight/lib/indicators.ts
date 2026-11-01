@@ -91,6 +91,71 @@ export function highLow(values: number[]): { high: number; low: number } | null 
   return { high, low };
 }
 
+export interface SRLevels {
+  support: number;
+  resistance: number;
+  supportTouches: number;
+  resistanceTouches: number;
+}
+
+/** Support and resistance zones from swing pivots in a close series.
+ *  Pivot highs/lows (local extremes over a small window) are clustered
+ *  when they land within 1.5% of each other; the strongest cluster below
+ *  the current price is support, the strongest above it is resistance.
+ *  Falls back to the window low/high when no cluster qualifies, so the
+ *  result is always derived from the real series, never invented.
+ *  Returns null when the series is too short to say anything honest. */
+export function supportResistance(values: number[]): SRLevels | null {
+  const pts = values.filter((v) => isFinite(v) && v > 0);
+  if (pts.length < 30) return null;
+  const price = pts[pts.length - 1];
+  const win = 5;
+  const lows: number[] = [];
+  const highs: number[] = [];
+  for (let i = win; i < pts.length - win; i++) {
+    let isLow = true;
+    let isHigh = true;
+    for (let j = i - win; j <= i + win; j++) {
+      if (pts[j] < pts[i]) isLow = false;
+      if (pts[j] > pts[i]) isHigh = false;
+    }
+    if (isLow) lows.push(pts[i]);
+    if (isHigh) highs.push(pts[i]);
+  }
+  const tol = 0.015;
+  function bestCluster(cands: number[], below: boolean): { level: number; touches: number } | null {
+    let best: { level: number; touches: number } | null = null;
+    for (const c of cands) {
+      if (below ? c >= price : c <= price) continue;
+      const members = cands.filter((v) => Math.abs(v / c - 1) <= tol);
+      if (!best || members.length > best.touches) {
+        best = { level: members.reduce((a, b) => a + b, 0) / members.length, touches: members.length };
+      }
+    }
+    return best;
+  }
+  const s = bestCluster(lows, true);
+  const r = bestCluster(highs, false);
+  const winLow = Math.min(...pts);
+  const winHigh = Math.max(...pts);
+  // Each side stands on its own: use the pivot cluster when one exists,
+  // otherwise the window extreme on that side. In a trending series
+  // price sits at one edge of its range, so the extreme on that side is
+  // the level price is testing, and the cluster on the other side is
+  // still a real swing zone.
+  const support = s ? s.level : winLow;
+  const resistance = r ? r.level : winHigh;
+  if (support < resistance && support <= price && resistance >= price) {
+    return {
+      support,
+      resistance,
+      supportTouches: s?.touches ?? 1,
+      resistanceTouches: r?.touches ?? 1,
+    };
+  }
+  return null;
+}
+
 /** Returns true when half or more of the last 24 candles have zero volume,
  *  meaning the series is too thin to trust. */
 export function isThinSeries(candles: Candle[]): boolean {

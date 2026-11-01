@@ -93,6 +93,7 @@ export const SAMPLE_BRIEF: Brief = {
   headlinesNote:
     "These are third-party headlines, not endorsements. Headlines can move prices fast, so treat them as context, not confirmation.",
   closes: [],
+  levels: null,
   feedLog: ["Binance.US: ok (200 candles)", "Kraken Futures funding: ok", "Fear and Greed index: ok (55 Greed)", "On-chain: ok", "Headlines: 5 matched"],
   disclaimer: DISCLAIMER,
 };

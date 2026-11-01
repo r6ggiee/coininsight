@@ -12,6 +12,8 @@ import {
   realizedVolPct,
   changePct,
   highLow,
+  supportResistance,
+  type SRLevels,
 } from "./indicators";
 import type { FundingInfo } from "./sources";
 import type { Headline } from "./news";
@@ -60,6 +62,9 @@ export interface Brief {
   headlines: Headline[];
   headlinesNote: string;
   closes: number[];
+  /** Support/resistance zones from swing pivots in `closes`, or null
+   *  when the series is too short. Powers the Trading Basics lesson. */
+  levels: SRLevels | null;
   feedLog: string[];
   disclaimer: string;
 }
@@ -349,6 +354,7 @@ export function assembleBrief(input: BriefInput): Brief {
     headlines,
     headlinesNote,
     closes: cs.slice(-168),
+    levels: supportResistance(cs.slice(-168)),
     feedLog,
     disclaimer: DISCLAIMER,
   };

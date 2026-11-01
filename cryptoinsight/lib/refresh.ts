@@ -176,6 +176,7 @@ export async function getSearchedBrief(
         ? "Keyword-matched from crypto news feeds; not verified as the cause of any move."
         : "No matching headlines found in crypto news feeds.",
       closes: [],
+      levels: null,
       feedLog: [
         "CoinGecko chart: no usable history, snapshot used instead",
         "Momentum, moving averages, volatility: unavailable, honestly labeled",

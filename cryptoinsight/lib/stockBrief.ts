@@ -15,6 +15,7 @@ import {
   realizedVolPct,
   changePct,
   highLow,
+  supportResistance,
 } from "./indicators";
 import type { Brief, BriefSection, BriefStats } from "./brief";
 import { fmtPrice, fmtPct, rsiWord } from "./brief";
@@ -183,6 +184,7 @@ export function buildStockBrief(input: StockBriefInput): Brief {
     headlines: headlines.map((h) => ({ ...h })),
     headlinesNote,
     closes: cs.slice(-252),
+    levels: supportResistance(cs.slice(-252)),
     feedLog,
     disclaimer: DISCLAIMER,
   };
