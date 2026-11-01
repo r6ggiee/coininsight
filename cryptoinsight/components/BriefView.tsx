@@ -11,6 +11,7 @@ import WatchlistButton from "@/components/WatchlistButton";
 import TradingViewChart, { tvSymbolFor, tvStockSymbolFor } from "@/components/TradingViewChart";
 import PriceChart from "@/components/PriceChart";
 import StatExplainer from "@/components/StatExplainer";
+import BasicsLesson from "@/components/BasicsLesson";
 import { stockCompareParams } from "@/components/StockPicker";
 
 function Stat({ label, value, tone }: { label: string; value: string; tone?: "pos" | "neg" }) {
@@ -208,6 +209,21 @@ export default function BriefView({ brief, pickerValue }: { brief: Brief; picker
           </section>
         )}
       </div>
+
+      {brief.levels && brief.closes.length >= 30 && (
+        <section className="brief-section" id="brief-basics" aria-label="Trading Basics lesson">
+          <h3>Trading Basics</h3>
+          <div className="source-note">
+            Animated lesson built from this {isStock ? "stock" : "coin"}&rsquo;s real chart, not a schematic
+          </div>
+          <BasicsLesson
+            closes={brief.closes}
+            symbol={brief.coin}
+            levels={brief.levels}
+            periodLabel={isStock ? "daily closes, about the last year" : "hourly closes, last 7 days"}
+          />
+        </section>
+      )}
 
       {brief.sections.map((sec, i) => (
         <section key={sec.id} className="brief-section" aria-label={sec.title}>
